@@ -21,13 +21,14 @@
     {% for b in books %}
         <h1>{{ b.title }}</h1>
         <h5>{{ b.date }}</h5>
-        <h3>{{ b.text }}</h3>
-        <h3>{{ b.authors.all }}</h3>
-        <a href='{% url "add-like" id=b.id %}'><h4>Likes:{{b.count}}</h4></a>
+        <h3>Описание: {{ b.text }}</h3>
+        <h5>{{ b.authors.all }}</h5>
+        <a href='{% url "add-like" id=b.id %}'><h4>Likes:{{b.likes1.count}}</h4></a>
         {% for comment in b.comments.all %}
-            <h2>{{ comment.text }}</h2>
+            <h4>Комментарий: {{ comment.text }}</h4>
             <h5>{{ comment.date }}</h5>
             <h6>{{ comment.author }}</h6>
+            <a href='{% url "add-like-comment" id=comment.id %}'><h4>Likes:{{ comment.likes_com.count }}</h4></a>
         {% endfor %}
     {% endfor %}
 </body>
