@@ -1,6 +1,6 @@
 from django.urls import path
 
-from manager.views import hello, MyPage, AddLike, AddCommentLike
+from manager.views import hello, MyPage, AddLike, AddCommentLike, BookDetail
 
 urlpatterns = [
     path('hello/', hello),
@@ -8,5 +8,6 @@ urlpatterns = [
     path('hello/<str:name>/', hello),
     path('add_like/<int:id>', AddLike.as_view(), name="add-like"),
     path('add_like_comment/<int:id>', AddCommentLike.as_view(), name="add-like-comment"),
+    path('book_view_detail/<int:id>/', BookDetail.as_view(), name="book-detail"),
     path("", MyPage.as_view(), name="the-main-page"),
 ]

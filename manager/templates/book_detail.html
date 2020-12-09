@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>.checked {color: orange;}
+</style>
+</head>
+<body>
+<div class="container">
+    <h5>{{ book.date }}</h5>
+    <h3>Описание: {{ book.text }}</h3>
+    <h5>{{ book.authors.all }}</h5>
+    <a href='{% url "add-like" id=b.id %}'><h4>Likes:{{book.likes}}</h4></a>
+<!--    {% for i in "12345"|rjust:5%}-->
+<!--        {% if rate < i %}-->
+<!--            <span class="fa fa-star"></span>-->
+<!--            {% else %}-->
+<!--                <span class="fa fa-star checked"></span>-->
+<!--            {% endif %}-->
+<!--        {% endfor %}-->
+
+</div>
+</body>
+</html>

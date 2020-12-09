@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>.checked {color: orange;}
+</style>
 </head>
 <body>
+<div class="container">
 <!--    <h1>Hello, world from html file</h1>-->
 <!--    <h1>Hello, {{name}}</h1>-->
 <!--    <h1>Hello, {{address}}</h1>-->
@@ -19,17 +24,26 @@
 <!--    {% endfor %}-->
 {{ user }}
     {% for b in books %}
-        <h1>{{ b.title }}</h1>
+        <a href="#"><h1>{{ b.title }}</h1></a>
         <h5>{{ b.date }}</h5>
         <h3>Описание: {{ b.text }}</h3>
         <h5>{{ b.authors.all }}</h5>
-        <a href='{% url "add-like" id=b.id %}'><h4>Likes:{{b.likes1.count}}</h4></a>
+        <a href='{% url "add-like" id=b.id %}'><h4>Likes:{{b.likes}}</h4></a>
+        {% for i in "12345"|rjust:5%}
+            {% if rate < i %}
+                <span class="fa fa-star"></span>
+            {% else %}
+                <span class="fa fa-star checked"></span>
+            {% endif %}
+        {% endfor %}
         {% for comment in b.comments.all %}
             <h4>Комментарий: {{ comment.text }}</h4>
             <h5>{{ comment.date }}</h5>
             <h6>{{ comment.author }}</h6>
-            <a href='{% url "add-like-comment" id=comment.id %}'><h4>Likes:{{ comment.likes_com.count }}</h4></a>
+            <a href='{% url "add-like-comment" id=comment.id %}'>
+                <h4>Likes:{{ comment.likes_com.count }}</h4></a>
         {% endfor %}
     {% endfor %}
+</div>
 </body>
 </html>
