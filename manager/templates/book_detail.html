@@ -6,14 +6,15 @@
 <h2>{{ book.date }}</h2>
 <h3>{{ book.text }}</h3>
 <h4>{{ book.authors.all }}</h4>
-{% for i in "12345" %}
-    {% if rate < i %}
+<p>rate: {{ book.rate }}</p>
+{% for i in rate %}
+    {% if book.rate >= i %}
         <a href="{% url 'add-rate-location' id=book.id rate=i location=1 %}">
-            <span class="fa fa-star"></span>
+            <span class="fa fa-star checked"></span>
         </a>
     {% else %}
         <a href="{% url 'add-rate-location' id=book.id rate=i location=1 %}">
-            <span class="fa fa-star checked"></span>
+            <span class="fa fa-star"></span>
         </a>
     {% endif %}
 {% endfor %}
@@ -21,7 +22,7 @@
     <h4>{{ comment.text }}</h4>
     <h5>{{ comment.date }}</h5>
     <h6>{{ comment.author }}</h6>
-    <a href="{% url 'add-like-comment' id=comment.id %}">
+    <a href="{% url 'add-like-comment-location' id=comment.id location=2 %}">
         <h4>Likes: {{ comment.count_like }}</h4>
     </a>
 {% endfor %}

@@ -91,17 +91,5 @@ class LikeComment(models.Model):
             self.comment.likes += 1
         self.comment.save()
 
-# class RateBook(models.Model):
-#     class Meta:
-#         unique_together = ("user", "book")
-#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="rated_book_table")
-#     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="rated_user_table")
-#     rate_book = models.PositiveIntegerField('rate_book')
-#
-#     def save(self, **kwargs):
-#         try:
-#             super().save(**kwargs)
-#         except:
-#             RateBook.objects.get(user=self.user, book=self.book).delete()
-#             super().save(**kwargs)
+
 # Create your models here.

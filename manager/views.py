@@ -39,11 +39,13 @@ class MyPage(View):
         return render(request, "index.html", context)
 
 class AddCommentLike(View):
-    def get(self, request, id):
+    def get(self, request, id, location=None):
         if request.user.is_authenticated:
             LikeComment.objects.create(user=request.user, comment_id=id)
-
-        return redirect("the-main-page")
+        if location is None:
+            return redirect("the-main-page")
+        else:
+            return redirect('book-detail', id=Comment.objects.all()[id-1].book.id) #тут исправить id
 
 class AddRate2Book(View):
     def get(self, request, id, rate, location=None):
@@ -60,5 +62,5 @@ class BookDetail(View):
         comment_query = Comment.objects.annotate(count_like=Count("likes_com")).select_related("author")
         comments = Prefetch("comments", comment_query)
         book = Book.objects.prefetch_related("authors", comments).get(id=id)
-        return render(request, "book_detail.html", {"book": book, "rate": 2})
+        return render(request, "book_detail.html", {"book": book, "rate": [1, 2, 3, 4, 5]})
 # Create your views here.
