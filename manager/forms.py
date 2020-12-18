@@ -1,5 +1,5 @@
-from django.forms import ModelForm, TextInput, Textarea, CharField, PasswordInput, BaseForm
-from manager.models import Book
+from django.forms import ModelForm, TextInput, Textarea, CharField, PasswordInput, BaseForm, ModelMultipleChoiceField
+from manager.models import Book, Comment
 from django.contrib.auth.forms import AuthenticationForm, UsernameField
 
 
@@ -24,3 +24,14 @@ class BookForm(ModelForm):
             "title": "",
             "text": ""
         }
+class CommentForm(ModelForm):
+    class Meta:
+        model = Comment
+        fields = ["text"]
+        widgets = {
+            "text": Textarea(attrs={"class": "form-control", "rows": 5, "cols": 50})
+        }
+        help_texts = {
+            "text": ""
+        }
+        #book_id = ModelMultipleChoiceField(queryset=Book.objects.all())

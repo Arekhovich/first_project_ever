@@ -27,4 +27,15 @@
     </a>
 {% endfor %}
 
+<h4>This is form for your comments</h4>
+
+
+{% if user.is_authenticated %}
+<form action="{% url 'add-comment' id=book.id %}" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="OK">
+</form>
+{% endif %}
+
 {% endblock %}

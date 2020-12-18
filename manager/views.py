@@ -1,14 +1,15 @@
 from math import ceil
 
+from django.contrib import auth
 from django.contrib.auth import login, logout
 from django.db.models import Count, Prefetch
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
 from django.db.models import Avg
 
-from manager.forms import BookForm, CustomAuthenticationForm
+from manager.forms import BookForm, CustomAuthenticationForm, CommentForm
 from manager.models import Book, LikeComment, Comment
 from manager.models import LikeBookUser as RateBookUser
 from django.contrib.auth.forms import AuthenticationForm
@@ -81,7 +82,7 @@ class BookDetail(View):
         comment_query = Comment.objects.annotate(count_like=Count("likes_com")).select_related("author")
         comments = Prefetch("comments", comment_query)
         book = Book.objects.prefetch_related("authors", comments).get(slug=slug)
-        return render(request, "book_detail.html", {"book": book, "rate": [1, 2, 3, 4, 5]})
+        return render(request, "book_detail.html", {"book": book, "rate": [1, 2, 3, 4, 5], "form": CommentForm()})
 
 class AddBook(View):
     def post(self, request):
@@ -91,4 +92,16 @@ class AddBook(View):
             book.authors.add(request.user)
             book.save()
         return redirect("the-main-page")
+
+class AddComment(View):
+    def post(self, request, id):
+        if request.user.is_authenticated:
+            cf = CommentForm(data=request.POST)
+            comment = cf.save(commit=False)
+            # Comment.objects.create(book_id=id, text=request.POST.get('text'), author_id=request.user.id)
+            comment.author_id = request.user.id
+            comment.book_id = id
+            comment.save()
+        slug = Book.objects.get(id=id).slug
+        return redirect("book-detail", slug=slug)
 # Create your views here.
