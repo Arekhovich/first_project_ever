@@ -1,43 +1,23 @@
-from math import ceil
 
-from django.contrib import auth
 from django.contrib.auth import login, logout
-from django.db.models import Count, Prefetch
-from django.http import HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
+from django.contrib.auth.models import User
+from django.db.models import Count, Prefetch, Exists, OuterRef
+from django.shortcuts import render, redirect
 from django.views import View
-from django.db.models import Avg
-
 from manager.forms import BookForm, CustomAuthenticationForm, CommentForm
 from manager.models import Book, LikeComment, Comment
 from manager.models import LikeBookUser as RateBookUser
 from django.contrib.auth.forms import AuthenticationForm
 
 
-def hello(request, name="filipp", digit=None):
-    if digit is not None:
-        return HttpResponse(f"digit is {digit}")
-    return HttpResponse(f"hello {name}")
-# class MyPage(View):
-#     def get(self, request):
-#         context = {}
-#         books = Book.objects.prefetch_related("authors", "comments")
-#         context["books"] = books.annotate(count=Count("users_like"))
-#         context["comments"] = Comment.objects.annotate(count=Count("likes_com"))
-#         return render(request, "index.html", context)
-#
-#         #добавление лайков для комментов вместо context["comments"]
-#         #comment_query=Comment.objects.annotate(count_like=Count("users_like")).select_related("author")
-#         #comments = Prefetch("comments", comment_query)
-#         #context["books"] = Book.objects.prefetch_related("authors", comments).annotate(count_like=Count("users_like"))
-
 class MyPage(View):
     def get(self, request):
         context = {}
-        comment_query = Comment.objects.annotate(count_like=Count("likes_com")).select_related("author")
-        comments = Prefetch("comments", comment_query)
-        context['books'] = Book.objects.prefetch_related("authors", comments)
+        books = Book.objects.prefetch_related("authors")
+        if request.user.is_authenticated:
+            is_owner = Exists(User.objects.filter(books =OuterRef("pk"), id = request.user.id))
+            books = books.annotate(is_owner = is_owner)
+        context['books'] = books
         context['range'] = range(1, 6)
         context['form'] = BookForm()
         return render(request, "index.html", context)
@@ -60,8 +40,8 @@ def logout_user(request):
 class AddCommentLike(View):
     def get(self, request, slug, location=None):
         if request.user.is_authenticated:
-            com_id = Comment.objects.get(book__slug=slug).id
-            LikeComment.objects.create(user=request.user, comment_id=com_id)
+            #com_id = Comment.objects.get(book__slug=slug).id
+            LikeComment.objects.create(user=request.user, comment_id=slug)
         if location is None:
             return redirect("the-main-page")
         else:
@@ -70,8 +50,8 @@ class AddCommentLike(View):
 class AddRate2Book(View):
     def get(self, request, slug, rate, location=None):
         if request.user.is_authenticated:
-            book_id = Book.objects.get(slug=slug).id
-            RateBookUser.objects.create(user=request.user, book_id=book_id, rate=rate)
+            #book_id = Book.objects.get(slug=slug).id
+            RateBookUser.objects.create(user=request.user, book_id=slug, rate=rate)
         if location is None:
             return redirect("the-main-page")
         return redirect('book-detail', slug=slug)
@@ -94,14 +74,40 @@ class AddBook(View):
         return redirect("the-main-page")
 
 class AddComment(View):
-    def post(self, request, id):
+    def post(self, request, slug):
         if request.user.is_authenticated:
+            # Comment.objects.create(book_id=id, text=request.POST.get('text'), author_id=request.user.id)
             cf = CommentForm(data=request.POST)
             comment = cf.save(commit=False)
-            # Comment.objects.create(book_id=id, text=request.POST.get('text'), author_id=request.user.id)
             comment.author_id = request.user.id
-            comment.book_id = id
+            comment.book_id = slug
             comment.save()
-        slug = Book.objects.get(id=id).slug
         return redirect("book-detail", slug=slug)
+
+def book_delete(request, slug):
+    if request.user.is_authenticated:
+        book = Book.objects.get(slug=slug)
+        if request.user in book.authors.all():
+            book.delete()
+    return redirect('the-main-page')
+
+class UpdateBook(View):
+    def get(self, request, slug):
+        if request.user.is_authenticated:
+            book = Book.objects.get(slug=slug)
+            if request.user in book.authors.all():
+                form = BookForm(instance=book)
+                return render(request, "update_book.html", {"form":form, "slug":book.slug})
+        return redirect('the-main-page')
+
+    def post(self, request, slug):
+        if request.user.is_authenticated:
+            book = Book.objects.get(slug=slug)
+            if request.user in book.authors.all():
+                bf = BookForm(instance=book, date = request.POST)
+                if bf.is_valid():
+                    bf.save(commit=True)
+        return redirect('the-main-page')
+
+
 # Create your views here.

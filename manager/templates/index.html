@@ -12,15 +12,20 @@
         <p>rate: {{ b.rate }}</p>
         {% for i in range %}
             {% if b.rate >= i %}
-                <a href="{% url 'add-rate' slug=b.slug rate=i%}">
+                <a href="{% url 'add-rate' slug=b.slug rate=i %}">
                     <span class="fa fa-star checked"></span>
                 </a>
             {% else %}
-                <a href="{% url 'add-rate' slug=b.slug rate=i%}">
+                <a href="{% url 'add-rate' slug=b.slug rate=i %}">
                     <span class="fa fa-star"></span>
                 </a>
             {% endif %}
         {% endfor %}
+        <br>
+        {% if b.is_owner %}
+            <a href="{% url 'delete-book' slug=b.slug %}">Delete book</a>
+            <a href="{% url 'update-book' slug=b.slug %}">Update book</a>
+        {% endif %}
 
         <br>
     {% endfor %}

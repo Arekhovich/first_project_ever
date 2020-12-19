@@ -18,33 +18,28 @@ class Book(models.Model):
     count_rated_users = models.PositiveIntegerField(default=0)
     count_all_stars = models.PositiveIntegerField(default=0)
     users_like = models.ManyToManyField(User, through="manager.LikeBookUser", related_name="liked_books")
-    slug = models.SlugField(null=True, unique=True)
-
+    slug = models.SlugField(primary_key=True)
 
     def __str__(self):
-        return f"{self.title}{self.id: >50}"
+        return f"{self.title}{self.slug:}"
 
     def save(self, **kwargs):
-        if self.id is None:
+        if self.slug == "":
             self.slug = slugify(self.title)
         try:
             super().save(**kwargs)
         except:
-            self.slug += str(self.id)
+            self.slug += str(self.date)
             super().save(**kwargs)
+
 
 class LikeBookUser(models.Model):
     class Meta:
         unique_together = ("user", "book")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked_book_table")
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="liked_user_table")
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="liked_user_table", null=True)
     rate = models.PositiveIntegerField(default=5)
 
-    # def save(self, **kwargs):
-    #     try:
-    #         super().save(**kwargs)
-    #     except:
-    #         LikeBookUser.objects.get(user=self.user,book=self.book).delete()
 
     def save(self, **kwargs):
         try:
@@ -65,7 +60,7 @@ class LikeBookUser(models.Model):
 class Comment(models.Model):
     text = models.TextField()
     date = models.DateTimeField(auto_now_add=True)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="comments")
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="comments", null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     likes = models.PositiveIntegerField(default=0)
     likes_com = models.ManyToManyField(User, through="manager.LikeComment", related_name="liked_comments")
@@ -78,12 +73,6 @@ class LikeComment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked_comment_table")
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="liked_comm_user_table")
 
-    # def save(self, **kwargs):
-    #     try:
-    #         super().save(**kwargs)
-    #     except:
-    #         LikeComment.objects.get(user=self.user, comment=self.comment).delete()
-
     def save(self, **kwargs):
         try:
             super().save(**kwargs)
@@ -94,5 +83,3 @@ class LikeComment(models.Model):
             self.comment.likes += 1
         self.comment.save()
 
-
-# Create your models here.

@@ -31,7 +31,7 @@
 
 
 {% if user.is_authenticated %}
-<form action="{% url 'add-comment' id=book.id %}" method="post">
+<form action="{% url 'add-comment' slug=book.slug %}" method="post">
     {% csrf_token %}
     {{ form }}
     <input type="submit" value="OK">
