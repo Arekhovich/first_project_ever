@@ -12,7 +12,7 @@ class Book(models.Model):
         help_text='ну это типа имя книги'
     )
     date = models.DateTimeField(auto_now_add=True, null=True)
-    text = models.TextField(max_length=200, null=True)
+    text = models.TextField(max_length=200, null=True, verbose_name='Описание')
     authors = models.ManyToManyField(User, related_name="books")
     rate = models.DecimalField(decimal_places=2, max_digits=3, default=0.0)
     count_rated_users = models.PositiveIntegerField(default=0)

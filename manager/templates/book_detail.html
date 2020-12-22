@@ -2,11 +2,14 @@
 
 
 {% block detail %}
+<a href="{% url 'the-main-page' %}"><h5>Вернуться на главную</h5></a>
 <h1>{{ book.title }}</h1>
-<h2>{{ book.date }}</h2>
-<h3>{{ book.text }}</h3>
-<h4>{{ book.authors.all }}</h4>
-<p>rate: {{ book.rate }}</p>
+<h6><i>{{ book.date }}</i></h6>
+<h2>{{ book.text }}</h2>
+{% for a in book.authors.all %}
+    <h6><i>{{ a }}</i></h6>
+{% endfor %}
+<span class="badge">{{ book.rate }}</span>
 {% for i in rate %}
     {% if book.rate >= i %}
         <a href="{% url 'add-rate-location' slug=book.slug rate=i location=1 %}">
@@ -19,15 +22,32 @@
     {% endif %}
 {% endfor %}
 {% for comment in book.comments.all %}
-    <h4>{{ comment.text }}</h4>
-    <h5>{{ comment.date }}</h5>
-    <h6>{{ comment.author }}</h6>
-    <a href="{% url 'add-like-comment-location' slug=book.slug location=2 %}">
-        <h4>Likes: {{ comment.likes }}</h4>
+    <h3><i>{{ comment.author }}</i></h3><h6><i>{{ comment.date }}</i></h6>
+    <h4 style="background-color:Grey;"><i>{{ comment.text }}</i></h4>
+    <a href="{% url 'add-like-comment-location' id=comment.id location=2 %}">
+        <h5>&#128151 {{ comment.likes }}</h5>
     </a>
+    {% if comment.is_liked %}
+        <h6><font color="red">Вам понравился этот комментарий</font></h6>
+    {% endif %}
+    {% if comment.is_owner %}
+        <a href="{% url 'delete-comment' id=comment.id %}">
+            <button type="button" class="btn btn-outline-danger">Удалить комментарий</button>
+        </a>
+        <a href="{% url 'update-comment' id=comment.id %}">
+            <button type="button" class="btn btn-outline-danger">Редактировть комментарий</button>
+        </a>
+    {% endif %}
+
 {% endfor %}
 
-<h4>This is form for your comments</h4>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<h4>Оставьте Ваш комментарий о книге</h4>
 
 
 {% if user.is_authenticated %}
