@@ -1,9 +1,10 @@
 {% extends 'main_template.html' %}
 
 {% block main %}
-<a href="{% url 'login' %}">login</a>
-<a href="{% url 'logout' %}">logout</a>
-{{ user }}
+<a href="{% url 'login' %}">Login</a>
+<a href="{% url 'logout' %}">Logout</a>
+<a href="{% url 'register' %}">Register</a>
+<h5>Здравствуйте, {{ user }}</h5>
     {% for b in books %}
         <a href="{% url 'book-detail' slug=b.slug %}"><h1>{{ b.title }}</h1></a>
         {% if b.is_owner %}
@@ -28,9 +29,10 @@
                     <span class="fa fa-star"></span>
                 </a>
             {% endif %}
+
         {% endfor %}
         <br>
-
+        <h5><i>{{ b.users_like.all }}</i></h5>
 
         <br>
     {% endfor %}

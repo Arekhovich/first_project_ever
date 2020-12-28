@@ -1,7 +1,7 @@
 from django.urls import path
 
 from manager.views import MyPage, AddCommentLike, BookDetail, AddRate2Book, AddBook, LoginView, \
-    logout_user, AddComment, book_delete, UpdateBook, comment_delete, UpdateComment
+    logout_user, AddComment, book_delete, UpdateBook, comment_delete, UpdateComment, RegisterView
 
 urlpatterns = [
     path('add_like_comment/<int:id>', AddCommentLike.as_view(), name="add-like-comment"),
@@ -16,6 +16,7 @@ urlpatterns = [
     path("delete_comment/<int:id>/", comment_delete, name="delete-comment"),
     path("update_comment/<int:id>/", UpdateComment.as_view(), name="update-comment"),
     path("login/", LoginView.as_view(), name="login"),
+    path("register/", RegisterView.as_view(), name="register"),
     path("logout/", logout_user, name="logout"),
     path("", MyPage.as_view(), name="the-main-page"),
 ]

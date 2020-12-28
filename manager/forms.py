@@ -1,6 +1,6 @@
 from django.forms import ModelForm, TextInput, Textarea, CharField, PasswordInput, BaseForm, ModelMultipleChoiceField
 from manager.models import Book, Comment
-from django.contrib.auth.forms import AuthenticationForm, UsernameField
+from django.contrib.auth.forms import AuthenticationForm, UsernameField, UserCreationForm
 
 
 class CustomAuthenticationForm(AuthenticationForm):
@@ -11,6 +11,21 @@ class CustomAuthenticationForm(AuthenticationForm):
         widget=PasswordInput(attrs={'autocomplete': 'current-password', "class": "form-control"}),
     )
 
+class CustomUserCreationForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        pass
+    username = UsernameField(widget=TextInput(attrs={'class': 'form-control'}))
+
+    password1 = CharField(
+        label="Password",
+        strip=False,
+        widget=PasswordInput(attrs={'autocomplete': 'new-password', 'class': 'form-control'})
+        )
+    password2 = CharField(
+        label="Password confirmation",
+        widget=PasswordInput(attrs={'autocomplete': 'new-password', 'class': 'form-control'}),
+        strip=False
+    )
 
 class BookForm(ModelForm):
     class Meta:

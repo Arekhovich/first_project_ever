@@ -1,13 +1,15 @@
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
+from django.contrib import messages
 from django.db.models import Count, Prefetch, Exists, OuterRef
 from django.shortcuts import render, redirect
 from django.views import View
-from manager.forms import BookForm, CustomAuthenticationForm, CommentForm
+from manager.forms import BookForm, CustomAuthenticationForm, CommentForm, CustomUserCreationForm
 from manager.models import Book, LikeComment, Comment
 from manager.models import LikeBookUser as RateBookUser
-from django.contrib.auth.forms import AuthenticationForm
+
+
 
 
 class MyPage(View):
@@ -30,8 +32,21 @@ class LoginView(View):
         user = CustomAuthenticationForm(data=request.POST)
         if user.is_valid():
             login(request, user.get_user())
-        return redirect("the-main-page")
+            return redirect("the-main-page")
+        messages.error(request, user.error_messages)
+        return redirect('login')
 
+class RegisterView(View):
+    def get(self, request):
+        form = CustomUserCreationForm()
+        return render(request, 'register.html', {'form':form})
+    def post(self, request):
+        form = CustomUserCreationForm(data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+        messages.error(request, form.error_messages)
+        return redirect('login')
 
 def logout_user(request):
     logout(request)
@@ -61,10 +76,10 @@ class AddRate2Book(View):
 class BookDetail(View):
     def get(self, request, slug):
 
-        comment_query = Comment.objects.annotate(count_like=Count("likes_com")).select_related("author")
+        comment_query = Comment.objects.select_related("author")
         if request.user.is_authenticated:
-            is_owner = Exists(User.objects.filter(comment =OuterRef("id"), id = request.user.id))
-            is_liked = Exists(LikeComment.objects.filter(comment_id =OuterRef("id"), user_id = request.user.id))
+            is_owner = Exists(User.objects.filter(commentus =OuterRef("id"), id = request.user.id))
+            is_liked = Exists(User.objects.filter(liked_comments =OuterRef("pk"), id = request.user.id))
             comment_query = comment_query.annotate(is_owner = is_owner, is_liked=is_liked)
         comments = Prefetch("comments", comment_query)
         book = Book.objects.prefetch_related("authors", comments).get(slug=slug)
@@ -96,7 +111,7 @@ def comment_delete(request, id):
         comment = Comment.objects.get(id=id)
         if request.user == comment.author:
             comment.delete()
-    return redirect('the-main-page')
+    return redirect('book-detail', slug = comment.book.slug)
 
 class UpdateComment(View):
     def get(self, request, id):
@@ -105,7 +120,7 @@ class UpdateComment(View):
             if request.user == comment.author:
                 form = CommentForm(instance=comment)
                 return render(request, "update_comment.html", {"form":form, "id":id})
-        return redirect('the-main-page')
+        return redirect('book-detail', slug = comment.book.slug)
 
     def post(self, request, id):
         if request.user.is_authenticated:
@@ -114,7 +129,7 @@ class UpdateComment(View):
                 cf = CommentForm(instance=comment, data = request.POST)
                 if cf.is_valid():
                     cf.save(commit=True)
-        return redirect('the-main-page')
+        return redirect('book-detail', slug = comment.book.slug)
 
 def book_delete(request, slug):
     if request.user.is_authenticated:
