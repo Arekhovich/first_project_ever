@@ -1,4 +1,5 @@
-from django.forms import ModelForm, TextInput, Textarea, CharField, PasswordInput, BaseForm, ModelMultipleChoiceField
+from django.forms import ModelForm, TextInput, Textarea, CharField, PasswordInput, BaseForm, ModelMultipleChoiceField, \
+    ModelChoiceField
 from manager.models import Book, Comment
 from django.contrib.auth.forms import AuthenticationForm, UsernameField, UserCreationForm
 
@@ -30,11 +31,11 @@ class CustomUserCreationForm(UserCreationForm):
 class BookForm(ModelForm):
     class Meta:
         model = Book
-        fields = ["title", "text"]
+        fields = ["title", "text", "genre"]
         widgets = {
             "title": TextInput(attrs={"class": "form-control"}),
-            "text": Textarea(attrs={"class": "form-control", "rows": 5, "cols": 50})
-        }
+            "text": Textarea(attrs={"class": "form-control", "rows": 5, "cols": 50}),
+            }
         help_texts = {
             "title": "",
             "text": ""
@@ -49,4 +50,6 @@ class CommentForm(ModelForm):
         help_texts = {
             "text": ""
         }
-        #book_id = ModelMultipleChoiceField(queryset=Book.objects.all())
+
+class GenreForm(ModelForm):
+    genre = ModelChoiceField(queryset=Book.objects.filter(genre=True))

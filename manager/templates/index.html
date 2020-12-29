@@ -5,6 +5,24 @@
 <a href="{% url 'logout' %}">Logout</a>
 <a href="{% url 'register' %}">Register</a>
 <h5>Здравствуйте, {{ user }}</h5>
+
+<div class="row">
+	<div class="col">
+		<div class="card card-body">
+
+			<form method="get">
+				{{genre_filter.form}}
+
+		    <button class="btn btn-primary" type="submit">Найти</button>
+		  </form>
+
+		</div>
+	</div>
+
+</div>
+<a href="{% url 'the-main-page' %}"><h5>Показать все</h5></a>
+
+
     {% for b in books %}
         <a href="{% url 'book-detail' slug=b.slug %}"><h1>{{ b.title }}</h1></a>
         {% if b.is_owner %}
@@ -16,8 +34,9 @@
             </a>
         {% endif %}
         <h6><i>{{ b.date }}</i></h6>
+        <h4>{{ b.genre.all|join:", " }}</h4>
         <h3>{{ b.text }}</h3>
-        <h6><i>{{ b.authors.all }}</i></h6>
+        <h6><i>Авторы: {{ b.authors.all|join:", " }}</i></h6>
         <span class="badge">{{ b.rate }}</span>
         {% for i in range %}
             {% if b.rate >= i %}
@@ -32,7 +51,7 @@
 
         {% endfor %}
         <br>
-        <h5><i>{{ b.users_like.all }}</i></h5>
+        <h5><i>Книгу оценили:{{ b.users_like.all|join:", "  }}</i></h5>
 
         <br>
     {% endfor %}

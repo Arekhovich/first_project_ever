@@ -5,10 +5,10 @@
 <a href="{% url 'the-main-page' %}"><h5>Вернуться на главную</h5></a>
 <h1>{{ book.title }}</h1>
 <h6><i>{{ book.date }}</i></h6>
+<h4>{{ book.genre.all|join:", " }}</h4>
 <h2>{{ book.text }}</h2>
-{% for a in book.authors.all %}
-    <h6><i>{{ a }}</i></h6>
-{% endfor %}
+<h5>Авторы: {{ book.authors.all|join:", " }}</h5>
+
 <span class="badge">{{ book.rate }}</span>
 {% for i in rate %}
     {% if book.rate >= i %}
@@ -38,7 +38,7 @@
             <button type="button" class="btn btn-outline-danger">Редактировть комментарий</button>
         </a>
     {% endif %}
-    <h4>{{ comment.likes_com.all }}</h4>
+    <h6>Комментарий понравился: {{ comment.likes_com.all|join:", " }}</h6>
 
 {% endfor %}
 

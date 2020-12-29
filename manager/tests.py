@@ -10,18 +10,17 @@ from manager.models import Book, Comment
 
 class TestMyAppPlease(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='username',
-                                             password='password')
+        self.user = User.objects.create_user('test_name')
         self.client = Client()
         self.user1 = User.objects.create_user('test_name1')
         self.user2 = User.objects.create_user('test_name2')
 
     def test_add_book(self):
-        self.client.force_login(self.user)
+        self.client.force_login(self.user1)
         url = reverse('add-book')
         data = {
-            'title' : 'test-title',
-            'text' : 'test-text'
+            'title': 'test title',
+            'text': 'test-text'
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302, msg = 'not redirect ')
@@ -30,10 +29,10 @@ class TestMyAppPlease(TestCase):
         self.assertEqual(book.title, data['title'])
         self.assertEqual(book.slug, slugify(data['title']))
         self.assertEqual(book.text, slugify(data['text']))
-        self.assertEqual(book.authors.first(), self.user)
+        self.assertEqual(book.authors.first(), self.user1)
         self.client.logout()
         data = {
-            'title': 'test-title2',
+            'title': 'test title',
             'text': 'test-text'
         }
         response = self.client.post(url, data)
@@ -133,27 +132,6 @@ class TestMyAppPlease(TestCase):
         self.comment.refresh_from_db()
         self.assertEqual(self.comment.likes, 2)
 
-    # def test_add_comment(self):
-    #     self.client.force_login(self.user)
-    #     self.book = Book.objects.create(title='test_title')
-    #     self.comment = Comment.objects.create()
-    #     self.comment.author = self.user
-    #     self.comment.author.save()
-    #     data = {
-    #         'text': 'good book'
-    #     }
-    #     url = reverse('add-comment', kwargs=dict(slug=self.book.slug))
-    #     response = self.client.post(url, data)
-    #     self.comment.refresh_from_db()
-    #     self.assertEqual(response.status_code, 302)
-    #
-    # def test_delete_comment(self):
-    #     book_test = Book.objects.all()[0]
-    #     comment_test = book_test.comments.all()[0]
-    #     self.assertEqual(comment_test.text, "test text")
-    #     url = reverse('delete-comment', kwargs=dict(id=comment_test.id))
-    #     self.client.get(url)
-    #     self.assertEqual(Comment.objects.count(), 0)
 
     def test_main_page(self):
         login = self.client.login(username='username', password='password')
@@ -162,14 +140,75 @@ class TestMyAppPlease(TestCase):
         self.assertTemplateUsed(resp, 'index.html')
 
     def test_login(self):
-        # user_login = self.client.login(username="username", password="password")
-        # self.assertTrue(user_login)
         url = reverse('login')
+        data = {
+            'username': 'username1',
+            'password': 'password2'
+        }
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(User.objects.exists())
+
+    def test_logout(self):
+        self.client.force_login(self.user)
         url = reverse('logout')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
+        self.assertTrue(User.objects.exists())
+
+    def test_registration(self):
+        url = reverse('register')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_book_detail(self):
+        self.client.force_login(self.user)
+        self.book1 = Book.objects.create(title='test_title1')
+        self.book1.authors.add(self.user)
+        self.book1.save()
+        url = reverse('book-detail', kwargs=dict(slug=self.book1.slug))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_add_comment(self):
+        self.client.force_login(self.user)
+        self.book1 = Book.objects.create(title='test_title1')
+        self.book1.authors.add(self.user)
+        self.book1.save()
+        url = reverse('add-comment', kwargs=dict(slug=self.book1.slug))
+        response = self.client.post(url, data={'text': 'test comment'})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Comment.objects.count(), 1)
+
+    def test_delete_comment(self):
+        self.client.force_login(self.user)
+        self.book1 = Book.objects.create(title='test_title1')
+        self.book1.authors.add(self.user)
+        self.book1.save()
+        url = reverse('add-comment', kwargs=dict(slug=self.book1.slug))
+        response = self.client.post(url, data={'text': 'test comment'})
+        id = Comment.objects.first().id
+        url = reverse('delete-comment', kwargs=dict(id=id))
+        response = self.client.get(url)
+        self.assertEqual(Comment.objects.count(), 0)
+
+    def test_update_comment(self):
+        self.client.force_login(self.user)
+        self.book1 = Book.objects.create(title='test_title1')
+        self.book1.authors.add(self.user)
+        self.book1.save()
+        url = reverse('add-comment', kwargs=dict(slug=self.book1.slug))
+        response = self.client.post(url, data={'text': 'test comment'})
+        id = Comment.objects.first().id
+        url = reverse('update-comment', kwargs=dict(id=id))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(url, data={'text': "new text"})
+        self.assertEqual(response.status_code, 302)
+
+
 
 
 
@@ -223,8 +262,8 @@ class TestMyAppExcepts(TransactionTestCase):
         self.book1.authors.add(self.user)
         self.book1.save()
         data = {
-            'title': 'test-title2',
-            'text': 'test-text'
+            'title': 'test_title2',
+            'text': 'test_text'
         }
         url = reverse('update-book', kwargs=dict(slug=self.book1.slug))
         response = self.client.post(url, data)
