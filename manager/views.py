@@ -6,8 +6,8 @@ from django.db.models import Count, Prefetch, Exists, OuterRef, Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
-
-from manager.filters import GenreFilter
+from django.http import HttpResponse
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from manager.forms import BookForm, CustomAuthenticationForm, CommentForm, CustomUserCreationForm
 from manager.models import Book, LikeComment, Comment, Genre
 from manager.models import LikeBookUser as RateBookUser
@@ -16,22 +16,41 @@ from manager.models import LikeBookUser as RateBookUser
 class MyPage(View):
     def get(self, request):
         context = {}
-        books = Book.objects.prefetch_related("authors")
-        #genre_book = Genre.objects.all()
-
-        genre_filter = GenreFilter(request.GET, queryset=books)
-        books = genre_filter.qs
+        books = Book.objects.prefetch_related("authors", "genre")
+        gen = Genre.objects.all()
+        paginator = Paginator(books, 10)
+        page = request.GET.get('page')
 
         if request.user.is_authenticated:
             is_owner = Exists(User.objects.filter(books=OuterRef("pk"), id=request.user.id))
             books = books.annotate(is_owner=is_owner)
+        try:
+            books = paginator.page(page)
+        except PageNotAnInteger:
+            books = paginator.page(1)
+        except EmptyPage:
+            books = paginator.page(paginator.num_pages)
         context['books'] = books
         context['range'] = range(1, 6)
         context['form'] = BookForm()
-        #context['genre_book'] = genre_book
-        context['genre_filter'] = genre_filter
+        context['gen'] = gen
+        context['page'] = page
         return render(request, "index.html", context)
 
+class PageGenre(View):
+    def get(self, request, genre):
+        books = Book.objects.filter(genre__name_genre=genre)
+        context = {}
+        books = books.prefetch_related('authors', 'genre')
+        gen = Genre.objects.all()
+        if request.user.is_authenticated:
+            is_owner = Exists(User.objects.filter(books=OuterRef('pk'), id=request.user.id))
+            books = books.annotate(is_owner=is_owner)
+        context['books'] = books.order_by('date')
+        context['range'] = range(1, 6)
+        context['form'] = BookForm()
+        context['gen'] = gen
+        return render(request, 'page_books_genre.html', context)
 
 class LoginView(View):
     def get(self, request):
@@ -100,7 +119,7 @@ class BookDetail(View):
 class AddBook(View):
     def post(self, request):
         if request.user.is_authenticated:
-            bf = BookForm(data=request.POST)
+            bf = BookForm(data = request.POST, files = request.FILES)
             book = bf.save(commit=True)
             book.authors.add(request.user)
             book.save()
@@ -146,6 +165,7 @@ class UpdateComment(View):
         return redirect('book-detail', slug = comment.book.slug)
 
 
+
 def book_delete(request, slug):
     if request.user.is_authenticated:
         book = Book.objects.get(slug=slug)
@@ -167,9 +187,11 @@ class UpdateBook(View):
         if request.user.is_authenticated:
             book = Book.objects.get(slug=slug)
             if request.user in book.authors.all():
-                bf = BookForm(instance=book, data = request.POST)
+                bf = BookForm(data = request.POST, files = request.FILES, instance=book)
                 if bf.is_valid():
                     bf.save(commit=True)
+
+
         return redirect('the-main-page')
 
 

@@ -1,13 +1,14 @@
 {% extends 'main_template.html' %}
 
+{% block genre %}
 
-{% block main %}
+{{ user }}<br>
 <a href="{% url 'login' %}">Login</a>
 <a href="{% url 'logout' %}">Logout</a>
 <a href="{% url 'register' %}">Register</a>
 <h5>Здравствуйте, {{ user }}</h5>
-
-<div class="btn-group">
+<div class="container">
+    <div class="btn-group">
     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
     Genre <span class="caret"></span></button>
     <ul class="dropdown-menu" role="menu">
@@ -17,15 +18,9 @@
         {% endfor %}
 
     </ul>
+    </div>
 </div>
-
-
-
-
-
-
-
-
+<a href="{% url 'the-main-page' %}"><h5>Показать все</h5></a>
 
     {% for b in books %}
         <a href="{% url 'book-detail' slug=b.slug %}"><h1>{{ b.title }}</h1></a>
@@ -38,7 +33,7 @@
             </a>
         {% endif %}
         <h6><i>{{ b.date }}</i></h6>
-        <h4>Жанры: {{ b.genre.all|join:", " }}</h4>
+        <h4>{{ b.genre_book.all|join:", " }}</h4>
         <h3>{{ b.text }}</h3>
         <h6><i>Авторы: {{ b.authors.all|join:", " }}</i></h6>
         <span class="badge">{{ b.rate }}</span>
@@ -66,7 +61,6 @@
 <br>
 <br>
 <br>
-{% include 'pagination.html' with page=books %}
 <h4>Добавьте Вашу книгу</h4>
 {% if user.is_authenticated %}
 <form action="{% url 'add-book' %}" method="post" enctype="multipart/form-data">
@@ -76,4 +70,3 @@
 </form>
 {% endif %}
 {% endblock %}
-

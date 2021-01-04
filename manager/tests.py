@@ -10,7 +10,7 @@ from manager.models import Book, Comment
 
 class TestMyAppPlease(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user('test_name')
+        self.user = User.objects.create_user(username='katerina', password='katerina1992')
         self.client = Client()
         self.user1 = User.objects.create_user('test_name1')
         self.user2 = User.objects.create_user('test_name2')
@@ -142,14 +142,21 @@ class TestMyAppPlease(TestCase):
     def test_login(self):
         url = reverse('login')
         data = {
-            'username': 'username1',
-            'password': 'password2'
+            'username': 'katerina',
+            'password': 'katerina1992'
         }
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(User.objects.exists())
+        self.assertTrue(User.objects.exists(), msg='User is not exist')
+        data2 = {
+            'username': 'katerina',
+            'password': 'katrina199'
+        }
+        response = self.client.post(url, data2)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(User.objects.exists(), msg='User is not exist')
 
     def test_logout(self):
         self.client.force_login(self.user)
@@ -160,8 +167,29 @@ class TestMyAppPlease(TestCase):
 
     def test_registration(self):
         url = reverse('register')
+        data = {
+            'username': 'kate',
+            'password1': '5544kate',
+            'password2': '5544kate'
+        }
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(User.objects.exists(), msg='User is not exist')
+
+    def test_registration_error(self):
+        url = reverse('register')
+        data = {
+            'username': 'kate',
+            'password1': 'kate344',
+            'password2': '344'
+        }
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(User.objects.exists(), msg='User is not exist')
 
     def test_book_detail(self):
         self.client.force_login(self.user)
@@ -171,6 +199,7 @@ class TestMyAppPlease(TestCase):
         url = reverse('book-detail', kwargs=dict(slug=self.book1.slug))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'book_detail.html')
 
     def test_add_comment(self):
         self.client.force_login(self.user)
@@ -205,8 +234,20 @@ class TestMyAppPlease(TestCase):
         url = reverse('update-comment', kwargs=dict(id=id))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(Comment.objects.count(), 1)
         response = self.client.post(url, data={'text': "new text"})
         self.assertEqual(response.status_code, 302)
+
+
+
+    def test_genre(self):
+        self.client.force_login(self.user)
+        self.book1 = Book.objects.create(title='test_title1')
+        self.book1.authors.add(self.user)
+        self.book1.save()
+        url = reverse('page-genre', kwargs=dict(genre=self.book1.genre))
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'page_books_genre.html')
 
 
 

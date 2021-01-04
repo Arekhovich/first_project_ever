@@ -5,7 +5,13 @@
 <a href="{% url 'the-main-page' %}"><h5>Вернуться на главную</h5></a>
 <h1>{{ book.title }}</h1>
 <h6><i>{{ book.date }}</i></h6>
-<h4>{{ book.genre.all|join:", " }}</h4>
+{% if book.cover %}
+    <img src="{{ book.cover.url }}" width="150" height="200">
+{% else %}
+    <p></p>
+{% endif %}
+
+<h4>{{ book.genre_all.all|join:", " }}</h4>
 <h2>{{ book.text }}</h2>
 <h5>Авторы: {{ book.authors.all|join:", " }}</h5>
 

@@ -18,7 +18,7 @@ class Book(models.Model):
         help_text='ну это типа имя книги'
     )
     date = models.DateTimeField(auto_now_add=True, null=True)
-    text = models.TextField(max_length=200, null=True, verbose_name='Описание')
+    text = models.TextField(max_length=1200, null=True, verbose_name='Описание')
     authors = models.ManyToManyField(User, related_name="books")
     rate = models.DecimalField(decimal_places=2, max_digits=3, default=0.0)
     count_rated_users = models.PositiveIntegerField(default=0)
@@ -26,6 +26,7 @@ class Book(models.Model):
     users_like = models.ManyToManyField(User, through="manager.LikeBookUser", related_name="liked_books")
     slug = models.SlugField(primary_key=True)
     genre = models.ManyToManyField(Genre, null=True, blank=True, related_name='genre_of_book', verbose_name='Жанр')
+    cover = models.ImageField('Обложка', upload_to="manager/", null=True, blank=True)
 
     def __str__(self):
         return f"{self.title}{self.slug:}"
@@ -65,7 +66,7 @@ class LikeBookUser(models.Model):
 
 
 class Comment(models.Model):
-    text = models.TextField()
+    text = models.TextField(max_length=120)
     date = models.DateTimeField(auto_now_add=True)
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="comments", null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)

@@ -1,5 +1,5 @@
 from django.forms import ModelForm, TextInput, Textarea, CharField, PasswordInput, BaseForm, ModelMultipleChoiceField, \
-    ModelChoiceField
+    ModelChoiceField, SelectMultiple, CheckboxSelectMultiple
 from manager.models import Book, Comment
 from django.contrib.auth.forms import AuthenticationForm, UsernameField, UserCreationForm
 
@@ -31,10 +31,11 @@ class CustomUserCreationForm(UserCreationForm):
 class BookForm(ModelForm):
     class Meta:
         model = Book
-        fields = ["title", "text", "genre"]
+        fields = ["title", "text", "genre", "cover"]
         widgets = {
             "title": TextInput(attrs={"class": "form-control"}),
             "text": Textarea(attrs={"class": "form-control", "rows": 5, "cols": 50}),
+            "genre": SelectMultiple(attrs={"class": "form-control"})
             }
         help_texts = {
             "title": "",
