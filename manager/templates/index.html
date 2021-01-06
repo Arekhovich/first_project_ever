@@ -20,13 +20,6 @@
 </div>
 
 
-
-
-
-
-
-
-
     {% for b in books %}
         <a href="{% url 'book-detail' slug=b.slug %}"><h1>{{ b.title }}</h1></a>
         {% if b.is_owner %}

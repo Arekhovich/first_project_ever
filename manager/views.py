@@ -1,6 +1,6 @@
 
-from django.contrib.auth import login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth import login, logout, get_user_model
+#from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Count, Prefetch, Exists, OuterRef, Q
 from django.http import JsonResponse
@@ -11,6 +11,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from manager.forms import BookForm, CustomAuthenticationForm, CommentForm, CustomUserCreationForm
 from manager.models import Book, LikeComment, Comment, Genre
 from manager.models import LikeBookUser as RateBookUser
+User = get_user_model()
 
 
 class MyPage(View):
@@ -18,18 +19,21 @@ class MyPage(View):
         context = {}
         books = Book.objects.prefetch_related("authors", "genre")
         gen = Genre.objects.all()
-        paginator = Paginator(books, 10)
-        page = request.GET.get('page')
 
+        # Проверка на владельца книги для удаления/редактирования
         if request.user.is_authenticated:
             is_owner = Exists(User.objects.filter(books=OuterRef("pk"), id=request.user.id))
             books = books.annotate(is_owner=is_owner)
+        # Добавление постраничного вывода
+        page = request.GET.get('page')
+        books = Paginator(books, 7)
         try:
-            books = paginator.page(page)
+            books = books.get_page(page)
         except PageNotAnInteger:
-            books = paginator.page(1)
+            books = books.page(1)
         except EmptyPage:
-            books = paginator.page(paginator.num_pages)
+            books = books.page(books.num_pages)
+
         context['books'] = books
         context['range'] = range(1, 6)
         context['form'] = BookForm()
