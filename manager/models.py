@@ -84,7 +84,31 @@ def save_user_profile(sender, instance, **kwargs):
 
 
 class VisitPage(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    class Meta:
+        unique_together = ("user", "book")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="visit_user")
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="visit_book")
+
+    def __str__(self):
+        return f"{self.book}"
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+
+class GitToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="git_user")
+    git_token = models.TextField(max_length=100)
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+
+class GitRepos(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="repos_user")
+    title_repos = models.TextField(max_length=100)
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+
 
 class Comment(models.Model):
     text = models.TextField(max_length=120)
@@ -93,7 +117,6 @@ class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     likes = models.PositiveIntegerField(default=0)
     likes_com = models.ManyToManyField(User, through="manager.LikeComment", related_name="liked_comments")
-
 
 
 class LikeComment(models.Model):

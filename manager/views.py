@@ -1,4 +1,4 @@
-
+import requests
 from django.contrib.auth import login, logout, get_user_model
 #from django.contrib.auth.models import User
 from django.contrib import messages
@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from manager.forms import BookForm, CustomAuthenticationForm, CommentForm, CustomUserCreationForm, UserForm, \
     ProfileForm
-from manager.models import Book, LikeComment, Comment, Genre, Profile
+from manager.models import Book, LikeComment, Comment, Genre, Profile, VisitPage, GitToken, GitRepos
 from manager.models import LikeBookUser as RateBookUser
 User = get_user_model()
 
@@ -121,7 +121,7 @@ class BookDetail(View):
             comment_query = comment_query.annotate(is_owner = is_owner, is_liked=is_liked)
         comments = Prefetch("comments", comment_query)
         book = Book.objects.prefetch_related("authors", comments).get(slug=slug)
-
+        VisitPage.objects.get_or_create(user=request.user, book_id=slug)
         return render(request, "book_detail.html", {"book": book, "rate": [1, 2, 3, 4, 5], "form": CommentForm()})
 
 
@@ -208,7 +208,7 @@ def update_profile(request):
     if request.method == 'POST':
 
         user_form = UserForm(data=request.POST, files=request.FILES, instance=request.user)
-        profile = Profile.objects.create(user=request.user)
+        profile = Profile.objects.get_or_create(user=request.user)
         profile_form = ProfileForm(data=request.POST, files=request.FILES, instance=request.user.profile)
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
@@ -217,9 +217,41 @@ def update_profile(request):
     else:
         user_form = UserForm(instance=request.user)
         profile_form = ProfileForm(instance=request.user.profile)
-    return render(request, 'account_user.html', {'user_form': user_form, 'profile_form': profile_form})
+    visit = VisitPage.objects.filter(user=request.user)
+    repos = GitRepos.objects.filter(user=request.user)
+    return render(request, 'account_user.html', {'user_form': user_form,
+                                                 'profile_form': profile_form,
+                                                 'visit': visit,
+                                                 'repos': repos
+                                                 })
 
 
+
+client_id = '337aad28ea23eaed3ddd'
+client_secret = 'e6f94809cc64336ab6ff5bcf02b213ffa3adc133'
+
+
+class GitReposCallback(View):
+    def get(self, request):
+        code = request.GET.get("code", "")
+        url = 'https://github.com/login/oauth/access_token'
+        data = {'client_id': client_id, 'client_secret': client_secret, 'code': code}
+        token = requests.post(url, data=data).text
+        token = token[13:-25]
+        GitToken.objects.get_or_create(user=request.user, git_token=token)
+        connections_url = 'https://api.github.com/user'
+        response = requests.get(connections_url,
+                                headers={'Authorization': 'token  ' + token})
+        login= response.json()['login']
+        repos = requests.get("https://api.github.com/users/" + login + "/repos").json()
+        repos_list = []
+        for r in repos:
+            GitRepos.objects.get_or_create(user=request.user, title_repos=r['name'])
+
+        return HttpResponse("Аутентификация произведена успешно")
+
+def page_not_found(request):
+    return render(request, '404.html')
 
 
 

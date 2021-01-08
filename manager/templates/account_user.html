@@ -2,22 +2,37 @@
 
 {% block account %}
 <h4>Добро пожаловать в личный кабинет</h4>
-<ul>
-  <li>Логин пользователя: {{ user.username }}</li>
-  <li>Био: {{ user.profile.about_user }}</li>
-  <li>Дата рождения: {{ user.profile.date_of_birth }}</li>
-  <li>Имя: {{ user.first_name }}</li>
-  <li>Фамилия: {{ user.last_name }}</li>
-  <li>Адрес электронной почты: {{ user.email }}</li>
-
-
-
-</ul>
+<a href="https://github.com/login/oauth/authorize?client_id=337aad28ea23eaed3ddd">
+    <h5>Пройти аутентификацию через github</h5>
+</a>
+<a href="{% url 'the-main-page' %}"><h5>Вернуться на главную</h5></a>
 {% if user.profile.photo %}
     <img src="{{ user.profile.photo.url }}" width="150" height="200">
 {% else %}
     <p></p>
 {% endif %}
+
+<p>Логин пользователя: {{ user.username }}</p>
+<p>Био: {{ user.profile.about_user }}</p>
+<p>Дата рождения: {{ user.profile.date_of_birth }}</p>
+<p>Имя: {{ user.first_name }}</p>
+<p>Фамилия: {{ user.last_name }}</p>
+<p>Адрес электронной почты: {{ user.email }}</p>
+
+
+<h4>Прочитаные книги</h4>
+{% for v in visit %}
+    <ul>
+        <li>{{ v.book.title }}</li>
+    </ul>
+{% endfor %}
+
+<h4>Репозитории github</h4>
+{% for r in repos %}
+    <ul>
+        <li>{{ r.title_repos }}</li>
+    </ul>
+{% endfor %}
 
 <br>
 <br>

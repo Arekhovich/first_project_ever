@@ -1,9 +1,9 @@
-from django.urls import path
+from django.urls import path, re_path
 from django.views.decorators.cache import cache_page
 
 from manager.views import MyPage, AddCommentLike, BookDetail, AddRate2Book, AddBook, LoginView, \
     logout_user, AddComment, book_delete, UpdateBook, comment_delete, UpdateComment, RegisterView, \
-    PageGenre, update_profile
+    PageGenre, update_profile, GitReposCallback
 
 urlpatterns = [
     path('add_like_comment/<int:id>', AddCommentLike.as_view(), name="add-like-comment"),
@@ -22,5 +22,6 @@ urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
     path("logout/", logout_user, name="logout"),
     path("account/", update_profile, name="account"),
+    re_path(r'^[-\w]+/', GitReposCallback.as_view(), name="the-git-repos"),
     path("", cache_page(60)(MyPage.as_view()), name="the-main-page"),
 ]

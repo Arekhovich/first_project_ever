@@ -6,6 +6,8 @@ import requests
 import webbrowser
 import base64
 
+from manager.models import Profile
+
 client_id = '337aad28ea23eaed3ddd'
 client_secret = 'e6f94809cc64336ab6ff5bcf02b213ffa3adc133'
 redirect_url = 'http://localhost:8000/oauth/callback'
@@ -26,6 +28,8 @@ class GitCallback(View):
         data = {'client_id': client_id, 'client_secret': client_secret, 'code': code}
         token = requests.post(url, data=data).text
         token = token[13:-25]
+        #Profile.objects.get(user=request.user).git_token = token
+        user=request.user
         connections_url = 'https://api.github.com/user'
         response = requests.get(connections_url,
                                 headers={'Authorization': 'token  ' + token})
@@ -35,5 +39,5 @@ class GitCallback(View):
         for r in repos:
             repos_list.append(r['name'])
 
-        output = "{0}".format(repos_list)
+        output = "{0}{1}".format(repos_list, user)
         return HttpResponse(output)
