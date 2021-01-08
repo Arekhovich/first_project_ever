@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'manager',
     'debug_toolbar',
-    'oauth'
+    'oauth',
 ]
 
 MIDDLEWARE = [

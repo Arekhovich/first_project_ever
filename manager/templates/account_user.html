@@ -1,0 +1,38 @@
+{% extends 'main_template.html' %}
+
+{% block account %}
+<h4>Добро пожаловать в личный кабинет</h4>
+<ul>
+  <li>Логин пользователя: {{ user.username }}</li>
+  <li>Био: {{ user.profile.about_user }}</li>
+  <li>Дата рождения: {{ user.profile.date_of_birth }}</li>
+  <li>Имя: {{ user.first_name }}</li>
+  <li>Фамилия: {{ user.last_name }}</li>
+  <li>Адрес электронной почты: {{ user.email }}</li>
+
+
+
+</ul>
+{% if user.profile.photo %}
+    <img src="{{ user.profile.photo.url }}" width="150" height="200">
+{% else %}
+    <p></p>
+{% endif %}
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<h5>Редактировать профиль</h5>
+{% if user.is_authenticated %}
+<form action="{% url 'account' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ profile_form }}
+    {{ user_form }}
+    <input type="submit" value="Save changes">
+</form>
+{% endif %}
+
+{% endblock %}

@@ -13,6 +13,7 @@ class BookAdmin(admin.ModelAdmin):
     readonly_fields = ['rate']
     exclude = ['count_all_stars', 'count_rated_users']
    # prepopulated_fields = {'slug' : 'title'}
+
 admin.site.register(Book, BookAdmin)
 admin.site.register(Genre)
 # Register your models here.

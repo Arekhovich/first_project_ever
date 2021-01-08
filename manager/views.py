@@ -2,14 +2,17 @@
 from django.contrib.auth import login, logout, get_user_model
 #from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.db.models import Count, Prefetch, Exists, OuterRef, Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
 from django.http import HttpResponse
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from manager.forms import BookForm, CustomAuthenticationForm, CommentForm, CustomUserCreationForm
-from manager.models import Book, LikeComment, Comment, Genre
+from manager.forms import BookForm, CustomAuthenticationForm, CommentForm, CustomUserCreationForm, UserForm, \
+    ProfileForm
+from manager.models import Book, LikeComment, Comment, Genre, Profile
 from manager.models import LikeBookUser as RateBookUser
 User = get_user_model()
 
@@ -25,7 +28,7 @@ class MyPage(View):
             is_owner = Exists(User.objects.filter(books=OuterRef("pk"), id=request.user.id))
             books = books.annotate(is_owner=is_owner)
         # Добавление постраничного вывода
-        page = request.GET.get('page')
+        page = request.GET.get('page', 1)
         books = Paginator(books, 7)
         try:
             books = books.get_page(page)
@@ -61,6 +64,7 @@ class LoginView(View):
         return render(request, "login.html", {'form': CustomAuthenticationForm()})
 
     def post(self, request):
+
         user = CustomAuthenticationForm(data=request.POST)
         if user.is_valid():
             login(request, user.get_user())
@@ -117,6 +121,7 @@ class BookDetail(View):
             comment_query = comment_query.annotate(is_owner = is_owner, is_liked=is_liked)
         comments = Prefetch("comments", comment_query)
         book = Book.objects.prefetch_related("authors", comments).get(slug=slug)
+
         return render(request, "book_detail.html", {"book": book, "rate": [1, 2, 3, 4, 5], "form": CommentForm()})
 
 
@@ -133,7 +138,6 @@ class AddBook(View):
 class AddComment(View):
     def post(self, request, slug):
         if request.user.is_authenticated:
-            # Comment.objects.create(book_id=id, text=request.POST.get('text'), author_id=request.user.id)
             cf = CommentForm(data=request.POST)
             comment = cf.save(commit=False)
             comment.author_id = request.user.id
@@ -197,6 +201,25 @@ class UpdateBook(View):
 
 
         return redirect('the-main-page')
+
+@login_required
+@transaction.atomic
+def update_profile(request):
+    if request.method == 'POST':
+
+        user_form = UserForm(data=request.POST, files=request.FILES, instance=request.user)
+        profile = Profile.objects.create(user=request.user)
+        profile_form = ProfileForm(data=request.POST, files=request.FILES, instance=request.user.profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            return redirect('the-main-page')
+    else:
+        user_form = UserForm(instance=request.user)
+        profile_form = ProfileForm(instance=request.user.profile)
+    return render(request, 'account_user.html', {'user_form': user_form, 'profile_form': profile_form})
+
+
 
 
 

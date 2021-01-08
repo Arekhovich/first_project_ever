@@ -1,6 +1,7 @@
+from django.contrib.auth.models import User
 from django.forms import ModelForm, TextInput, Textarea, CharField, PasswordInput, BaseForm, ModelMultipleChoiceField, \
-    ModelChoiceField, SelectMultiple, CheckboxSelectMultiple
-from manager.models import Book, Comment
+    ModelChoiceField, SelectMultiple, CheckboxSelectMultiple, DateField, DateInput
+from manager.models import Book, Comment, Profile
 from django.contrib.auth.forms import AuthenticationForm, UsernameField, UserCreationForm
 
 
@@ -54,3 +55,18 @@ class CommentForm(ModelForm):
 
 class GenreForm(ModelForm):
     genre = ModelChoiceField(queryset=Book.objects.filter(genre=True))
+
+
+class UserForm(ModelForm):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email')
+
+class ProfileForm(ModelForm):
+    class Meta:
+        model = Profile
+        fields = ('about_user', 'date_of_birth', 'photo')
+        widgets = {
+            "about_user": Textarea(attrs={"class": "form-control", "rows": 5, "cols": 20}),
+            "date_of_birth": DateInput()
+        }
