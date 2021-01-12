@@ -24,10 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '^@kgv##*9lo@oeysb+g+*$ob&uxjqd(ay1-3(zx13ysz%n6zrw'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
 
+DEBUG = False
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -77,7 +79,17 @@ WSGI_APPLICATION = 'book_shop.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
+#'HOST': os.environ.get('POSTGRES_HOST', default='localhost')
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': os.environ.get("POSTGRES_DB"),
+#         'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
+#         'USER': os.environ.get("POSTGRES_USER"),
+#         'PORT': '5432',
+#         'HOST': '127.0.0.1'
+#     }
+# }
 import os
 DATABASES = {
     'default': {
@@ -133,6 +145,7 @@ CACHES = {
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = 'static'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -148,6 +161,26 @@ import socket
 # tricks to have debug toolbar when developing with docker
 ip = socket.gethostbyname(socket.gethostname())
 INTERNAL_IPS += [ip[:-1] + '1']
+
+
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+CELERY_BROKER_URL='redis://cache:6379'
+CELERY_RESULT_BACKEND='redis://cache:6379'
+CELERY_ACCEPT_CONTENT=['json']
+CELERY_TASK_SERIALIZER='json'
+
+CELERY_BEAT_SCHEDULE = {
+    "task_one": {
+        "task": "manager.tasks.update_repos",
+        "schedule": 2700.0
+    },
+}
+
+# GIT_CLIENT_ID = '337aad28ea23eaed3ddd'
+# GIT_CLIENT_SECRET = 'e6f94809cc64336ab6ff5bcf02b213ffa3adc133'
+
 
 
 

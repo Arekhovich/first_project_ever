@@ -14,6 +14,7 @@ from manager.forms import BookForm, CustomAuthenticationForm, CommentForm, Custo
     ProfileForm
 from manager.models import Book, LikeComment, Comment, Genre, Profile, VisitPage, GitToken, GitRepos
 from manager.models import LikeBookUser as RateBookUser
+from manager.tasks import update_repos
 User = get_user_model()
 
 
@@ -236,18 +237,24 @@ class GitReposCallback(View):
         code = request.GET.get("code", "")
         url = 'https://github.com/login/oauth/access_token'
         data = {'client_id': client_id, 'client_secret': client_secret, 'code': code}
-        token = requests.post(url, data=data).text
-        token = token[13:-25]
-        GitToken.objects.get_or_create(user=request.user, git_token=token)
+        token = requests.post(url, data=data, headers={'Accept': 'application/json'})
+        token = token.json()['access_token']
+        if GitToken.objects.filter(user=request.user):
+            GitToken.objects.filter(user=request.user).update(user=request.user, git_token=token)
+        else:
+            GitToken.objects.create(user=request.user, git_token=token)
         connections_url = 'https://api.github.com/user'
         response = requests.get(connections_url,
                                 headers={'Authorization': 'token  ' + token})
         login= response.json()['login']
         repos = requests.get("https://api.github.com/users/" + login + "/repos").json()
-        repos_list = []
-        for r in repos:
-            GitRepos.objects.get_or_create(user=request.user, title_repos=r['name'])
-
+        if GitRepos.objects.filter(user=request.user):
+            GitRepos.objects.filter(user=request.user).delete()
+            for r in repos:
+                GitRepos.objects.create(user=request.user, title_repos=r['name'])
+        else:
+            for r in repos:
+                GitRepos.objects.create(user=request.user, title_repos=r['name'])
         return HttpResponse("Аутентификация произведена успешно")
 
 def page_not_found(request):

@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views import View
+from book_shop.settings import GIT_CLIENT_ID, GIT_CLIENT_SECRET
 
 import requests
 import webbrowser
@@ -15,11 +16,9 @@ redirect_url = 'http://localhost:8000/oauth/callback'
 
 class GitOauth(View):
     def get(self, request):
-        client_id = '337aad28ea23eaed3ddd'
-        auth_url = ('''https://github.com/login/oauth/authorize''' +
-                    '''?client_id=''' + client_id +
-                    '''&redirect_uri=http://localhost:8000/oauth/callback''')
-        return render(request, 'git.html')
+
+        url = "https://github.com/login/oauth/authorize?client_id={GIT_CLIENT_ID}"
+        return render(request, 'git.html', {'url': url})
 
 class GitCallback(View):
     def get(self, request):
