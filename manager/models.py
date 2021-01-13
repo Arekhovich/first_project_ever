@@ -14,6 +14,7 @@ class Genre(models.Model):
     def __str__(self):
         return self.name_genre
 
+
 class Book(models.Model):
     title = models.CharField(
         max_length=50,
@@ -51,7 +52,6 @@ class LikeBookUser(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="liked_user_table", null=True)
     rate = models.PositiveIntegerField(default=5)
 
-
     def save(self, **kwargs):
         try:
             super().save(**kwargs)
@@ -73,10 +73,12 @@ class Profile(models.Model):
     about_user = models.TextField(max_length=300, null=True, blank=True, verbose_name='О себе')
     photo = models.ImageField(upload_to='manager/', blank=True, null=True)
 
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
+
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
@@ -95,12 +97,14 @@ class VisitPage(models.Model):
     def save(self, **kwargs):
         super().save(**kwargs)
 
+
 class GitToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="git_user")
     git_token = models.TextField(max_length=100)
 
     def save(self, **kwargs):
         super().save(**kwargs)
+
 
 class GitRepos(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="repos_user")
@@ -121,7 +125,7 @@ class Comment(models.Model):
 
 class LikeComment(models.Model):
     class Meta:
-        unique_together = ("user", "comment") #взаимоуникальные поля
+        unique_together = ("user", "comment")  # взаимоуникальные поля
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liked_comment_table")
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="liked_comm_user_table")
 
@@ -134,5 +138,3 @@ class LikeComment(models.Model):
         else:
             self.comment.likes += 1
         self.comment.save()
-
-

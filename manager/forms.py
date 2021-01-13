@@ -13,11 +13,11 @@ class CustomAuthenticationForm(AuthenticationForm):
         widget=PasswordInput(attrs={'autocomplete': 'current-password', "class": "form-control"}),
     )
 
+
 class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         pass
     username = UsernameField(widget=TextInput(attrs={'class': 'form-control'}))
-
     password1 = CharField(
         label="Password",
         strip=False,
@@ -28,6 +28,7 @@ class CustomUserCreationForm(UserCreationForm):
         widget=PasswordInput(attrs={'autocomplete': 'new-password', 'class': 'form-control'}),
         strip=False
     )
+
 
 class BookForm(ModelForm):
     class Meta:
@@ -42,6 +43,8 @@ class BookForm(ModelForm):
             "title": "",
             "text": ""
         }
+
+
 class CommentForm(ModelForm):
     class Meta:
         model = Comment
@@ -53,6 +56,7 @@ class CommentForm(ModelForm):
             "text": ""
         }
 
+
 class GenreForm(ModelForm):
     genre = ModelChoiceField(queryset=Book.objects.filter(genre=True))
 
@@ -61,6 +65,7 @@ class UserForm(ModelForm):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email')
+
 
 class ProfileForm(ModelForm):
     class Meta:

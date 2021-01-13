@@ -1,8 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views import View
-from book_shop.settings import GIT_CLIENT_ID, GIT_CLIENT_SECRET
-
 import requests
 import webbrowser
 import base64

@@ -23,8 +23,8 @@ class TestMyAppPlease(TestCase):
             'text': 'test-text'
         }
         response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 302, msg = 'not redirect ')
-        self.assertTrue(Book.objects.exists(), msg = 'book is not created')
+        self.assertEqual(response.status_code, 302, msg='not redirect ')
+        self.assertTrue(Book.objects.exists(), msg='book is not created')
         book = Book.objects.first()
         self.assertEqual(book.title, data['title'])
         self.assertEqual(book.slug, slugify(data['title']))
@@ -41,10 +41,10 @@ class TestMyAppPlease(TestCase):
 
     def test_update_book(self):
         self.client.force_login(self.user)
-        self.book1 = Book.objects.create(title = 'test_title1')
+        self.book1 = Book.objects.create(title='test_title1')
         self.book1.authors.add(self.user)
         self.book1.save()
-        self.book2 = Book.objects.create(title = 'test_title2')
+        self.book2 = Book.objects.create(title='test_title2')
         self.assertEqual(Book.objects.count(), 2)
         data = {
             'title': 'test-title2',
@@ -55,7 +55,7 @@ class TestMyAppPlease(TestCase):
         self.book1.refresh_from_db()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.book1.title, data['title'], msg='book1 is not refresh')
-        self.assertEqual(self.book1.text, data['text'], msg = 'book is not refresh')
+        self.assertEqual(self.book1.text, data['text'], msg='book is not refresh')
         self.assertEqual(self.book1.authors.first(), self.user)
         self.client.logout()
         url = reverse('update-book', kwargs=dict(slug=self.book1.slug))
@@ -67,7 +67,7 @@ class TestMyAppPlease(TestCase):
 
     def test_update_book_get(self):
         self.client.force_login(self.user)
-        self.book1 = Book.objects.create(title = 'test_title1')
+        self.book1 = Book.objects.create(title='test_title1')
         self.book1.authors.add(self.user)
         self.book1.save()
         url = reverse('update-book', kwargs=dict(slug=self.book1.slug))
@@ -88,7 +88,7 @@ class TestMyAppPlease(TestCase):
         self.client.get(url)
         self.book1.refresh_from_db()
         self.assertEqual(self.book1.rate, 3)
-        #new user
+        # new user
         self.client.force_login(self.user1)
         url = reverse('add-rate', kwargs=dict(slug=self.book1.slug, rate=4))
         self.client.get(url)
@@ -131,7 +131,6 @@ class TestMyAppPlease(TestCase):
         self.client.get(url)
         self.comment.refresh_from_db()
         self.assertEqual(self.comment.likes, 2)
-
 
     def test_main_page(self):
         login = self.client.login(username='username', password='password')
@@ -238,8 +237,6 @@ class TestMyAppPlease(TestCase):
         response = self.client.post(url, data={'text': "new text"})
         self.assertEqual(response.status_code, 302)
 
-
-
     def test_genre(self):
         self.client.force_login(self.user)
         self.book1 = Book.objects.create(title='test_title1')
@@ -250,18 +247,11 @@ class TestMyAppPlease(TestCase):
         self.assertTemplateUsed(response, 'page_books_genre.html')
 
 
-
-
-
-
-
-
 class TestMyAppExcepts(TransactionTestCase):
     def setUp(self):
         self.user = User.objects.create_user('test_name')
         self.user1 = User.objects.create_user('test_name1')
         self.user2 = User.objects.create_user('test_name2')
-
 
     def test_rate_repeat(self):
         self.client.force_login(self.user)
@@ -270,7 +260,7 @@ class TestMyAppExcepts(TransactionTestCase):
         self.client.get(url)
         self.book1.refresh_from_db()
         self.assertEqual(self.book1.rate, 3)
-        #repeat user
+        # repeat user
         self.client.force_login(self.user)
         url = reverse('add-rate', kwargs=dict(slug=self.book1.slug, rate=4))
         self.client.get(url)
@@ -299,7 +289,7 @@ class TestMyAppExcepts(TransactionTestCase):
 
     def test_except_slug(self):
         self.client.force_login(self.user)
-        self.book1 = Book.objects.create(title = 'test_title1')
+        self.book1 = Book.objects.create(title='test_title1')
         self.book1.authors.add(self.user)
         self.book1.save()
         data = {
@@ -310,14 +300,6 @@ class TestMyAppExcepts(TransactionTestCase):
         response = self.client.post(url, data)
         self.book1.refresh_from_db()
         self.assertEqual(self.book1.title, data['title'], msg='book1 is not refresh')
-        self.assertEqual(self.book1.text, data['text'], msg = 'book is not refresh')
+        self.assertEqual(self.book1.text, data['text'], msg='book is not refresh')
         self.book2 = Book.objects.create(title='test_title1')
         self.assertNotEqual(self.book2.slug, 'test-title1')
-
-
-
-
-
-
-
-

@@ -1,6 +1,6 @@
 import requests
 from django.contrib.auth import login, logout, get_user_model
-#from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
@@ -45,6 +45,7 @@ class MyPage(View):
         context['page'] = page
         return render(request, "index.html", context)
 
+
 class PageGenre(View):
     def get(self, request, genre):
         books = Book.objects.filter(genre__name_genre=genre)
@@ -59,6 +60,7 @@ class PageGenre(View):
         context['form'] = BookForm()
         context['gen'] = gen
         return render(request, 'page_books_genre.html', context)
+
 
 class LoginView(View):
     def get(self, request):
@@ -117,20 +119,20 @@ class BookDetail(View):
     def get(self, request, slug):
         comment_query = Comment.objects.select_related("author")
         if request.user.is_authenticated:
-            is_owner = Exists(User.objects.filter(comment =OuterRef("id"), id = request.user.id))
-            is_liked = Exists(User.objects.filter(liked_comments =OuterRef("pk"), id = request.user.id))
-            comment_query = comment_query.annotate(is_owner = is_owner, is_liked=is_liked)
+            is_owner = Exists(User.objects.filter(comment=OuterRef("id"), id=request.user.id))
+            is_liked = Exists(User.objects.filter(liked_comments=OuterRef("pk"), id=request.user.id))
+            comment_query = comment_query.annotate(is_owner=is_owner, is_liked=is_liked)
         comments = Prefetch("comments", comment_query)
         book = Book.objects.prefetch_related("authors", comments).get(slug=slug)
         if request.user.is_authenticated:
-        	VisitPage.objects.get_or_create(user=request.user, book_id=slug)
+            VisitPage.objects.get_or_create(user=request.user, book_id=slug)
         return render(request, "book_detail.html", {"book": book, "rate": [1, 2, 3, 4, 5], "form": CommentForm()})
 
 
 class AddBook(View):
     def post(self, request):
         if request.user.is_authenticated:
-            bf = BookForm(data = request.POST, files = request.FILES)
+            bf = BookForm(data=request.POST, files=request.FILES)
             book = bf.save(commit=True)
             book.authors.add(request.user)
             book.save()
@@ -153,7 +155,7 @@ def comment_delete(request, id):
         comment = Comment.objects.get(id=id)
         if request.user == comment.author:
             comment.delete()
-    return redirect('book-detail', slug = comment.book.slug)
+    return redirect('book-detail', slug=comment.book.slug)
 
 
 class UpdateComment(View):
@@ -162,18 +164,17 @@ class UpdateComment(View):
             comment = Comment.objects.get(id=id)
             if request.user == comment.author:
                 form = CommentForm(instance=comment)
-                return render(request, "update_comment.html", {"form":form, "id":id})
-        return redirect('book-detail', slug = comment.book.slug)
+                return render(request, "update_comment.html", {"form": form, "id": id})
+        return redirect('book-detail', slug=comment.book.slug)
 
     def post(self, request, id):
         if request.user.is_authenticated:
             comment = Comment.objects.get(id=id)
             if request.user == comment.author:
-                cf = CommentForm(instance=comment, data = request.POST)
+                cf = CommentForm(instance=comment, data=request.POST)
                 if cf.is_valid():
                     cf.save(commit=True)
-        return redirect('book-detail', slug = comment.book.slug)
-
+        return redirect('book-detail', slug=comment.book.slug)
 
 
 def book_delete(request, slug):
@@ -190,19 +191,18 @@ class UpdateBook(View):
             book = Book.objects.get(slug=slug)
             if request.user in book.authors.all():
                 form = BookForm(instance=book)
-                return render(request, "update_book.html", {"form":form, "slug":book.slug})
+                return render(request, "update_book.html", {"form": form, "slug": book.slug})
         return redirect('the-main-page')
 
     def post(self, request, slug):
         if request.user.is_authenticated:
             book = Book.objects.get(slug=slug)
             if request.user in book.authors.all():
-                bf = BookForm(data = request.POST, files = request.FILES, instance=book)
+                bf = BookForm(data=request.POST, files=request.FILES, instance=book)
                 if bf.is_valid():
                     bf.save(commit=True)
-
-
         return redirect('the-main-page')
+
 
 @login_required
 @transaction.atomic
@@ -210,7 +210,7 @@ def update_profile(request):
     if request.method == 'POST':
 
         user_form = UserForm(data=request.POST, files=request.FILES, instance=request.user)
-        profile = Profile.objects.get_or_create(user=request.user)
+        # profile = Profile.objects.get_or_create(user=request.user)
         profile_form = ProfileForm(data=request.POST, files=request.FILES, instance=request.user.profile)
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
@@ -226,7 +226,6 @@ def update_profile(request):
                                                  'visit': visit,
                                                  'repos': repos
                                                  })
-
 
 
 client_id = '337aad28ea23eaed3ddd'
@@ -247,7 +246,7 @@ class GitReposCallback(View):
         connections_url = 'https://api.github.com/user'
         response = requests.get(connections_url,
                                 headers={'Authorization': 'token  ' + token})
-        login= response.json()['login']
+        login = response.json()['login']
         repos = requests.get("https://api.github.com/users/" + login + "/repos").json()
         if GitRepos.objects.filter(user=request.user):
             GitRepos.objects.filter(user=request.user).delete()
@@ -258,11 +257,6 @@ class GitReposCallback(View):
                 GitRepos.objects.create(user=request.user, title_repos=r['name'])
         return HttpResponse("Аутентификация произведена успешно")
 
+
 def page_not_found(request):
     return render(request, '404.html')
-
-
-
-
-
-
