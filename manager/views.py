@@ -122,7 +122,8 @@ class BookDetail(View):
             comment_query = comment_query.annotate(is_owner = is_owner, is_liked=is_liked)
         comments = Prefetch("comments", comment_query)
         book = Book.objects.prefetch_related("authors", comments).get(slug=slug)
-        VisitPage.objects.get_or_create(user=request.user, book_id=slug)
+        if request.user.is_authenticated:
+        	VisitPage.objects.get_or_create(user=request.user, book_id=slug)
         return render(request, "book_detail.html", {"book": book, "rate": [1, 2, 3, 4, 5], "form": CommentForm()})
 
 
