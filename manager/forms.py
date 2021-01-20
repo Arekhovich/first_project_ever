@@ -50,7 +50,7 @@ class CommentForm(ModelForm):
         model = Comment
         fields = ["text"]
         widgets = {
-            "text": Textarea(attrs={"class": "form-control", "rows": 5, "cols": 50})
+            "text": Textarea(attrs={'id': 'comment-text', "class": "form-control", "rows": 5, "cols": 50})
         }
         help_texts = {
             "text": ""

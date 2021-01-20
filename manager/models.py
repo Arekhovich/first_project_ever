@@ -1,3 +1,5 @@
+from json import loads, dumps
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -22,7 +24,7 @@ class Book(models.Model):
         help_text='ну это типа имя книги'
     )
     date = models.DateTimeField(auto_now_add=True, null=True)
-    text = models.TextField(max_length=1200, null=True, verbose_name='Описание')
+    text = models.TextField(max_length=2000, null=True, verbose_name='Описание')
     authors = models.ManyToManyField(User, related_name="books")
     rate = models.DecimalField(decimal_places=2, max_digits=3, default=0.0)
     count_rated_users = models.PositiveIntegerField(default=0)
@@ -73,16 +75,11 @@ class Profile(models.Model):
     about_user = models.TextField(max_length=300, null=True, blank=True, verbose_name='О себе')
     photo = models.ImageField(upload_to='manager/', blank=True, null=True)
 
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    @receiver(post_save, sender=User)
+    def create_profile(sender, instance, created, **kwargs):
+        if created:
+            Profile.objects.create(user=instance)
+        instance.profile.save()
 
 
 class VisitPage(models.Model):
@@ -98,20 +95,21 @@ class VisitPage(models.Model):
         super().save(**kwargs)
 
 
-class GitToken(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="git_user")
-    git_token = models.TextField(max_length=100)
+class GitAccount(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="repos_user")
+    github_account = models.CharField(null=True, max_length=100)
+    _title_repos = models.TextField(null=True)
 
-    def save(self, **kwargs):
-        super().save(**kwargs)
+    @property
+    def title_repos(self):
+        if self._title_repos is not None:
+            return loads(self._title_repos)
+        return []
 
-
-class GitRepos(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="repos_user")
-    title_repos = models.TextField(max_length=100)
-
-    def save(self, **kwargs):
-        super().save(**kwargs)
+    @title_repos.setter
+    def title_repos(self, value):
+        assert isinstance(value, list), "you can set"
+        self._title_repos = dumps(value)
 
 
 class Comment(models.Model):

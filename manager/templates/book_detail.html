@@ -2,6 +2,8 @@
 
 
 {% block detail %}
+{% load static %}
+
 <a href="{% url 'the-main-page' %}"><h5>Вернуться на главную</h5></a>
 <h1>{{ book.title }}</h1>
 <h6><i>{{ book.date }}</i></h6>
@@ -15,38 +17,38 @@
 <h2>{{ book.text }}</h2>
 <h5>Авторы: {{ book.authors.all|join:", " }}</h5>
 
-<span class="badge">{{ book.rate }}</span>
+<h4 class='add-rate' id="book_rate_{{ book.slug }}">Рейтинг: {{ book.rate }}</h4>
 {% for i in rate %}
     {% if book.rate >= i %}
-        <a href="{% url 'add-rate-location' slug=book.slug rate=i location=1 %}">
-            <span class="fa fa-star checked"></span>
-        </a>
+        <span class="rate fa fa-star checked" id="book_{{ book.slug }}_{{ i }}"></span>
     {% else %}
-        <a href="{% url 'add-rate-location' slug=book.slug rate=i location=1 %}">
-            <span class="fa fa-star"></span>
-        </a>
+        <span class="rate fa fa-star" id="book_{{ book.slug }}_{{ i }}"></span>
     {% endif %}
 {% endfor %}
+
+
+
+<div>Последние добавленные комментарии</div>
+<div id="bookdetailview"></div>
 {% for comment in book.comments.all %}
+<div class="all-comment" id="block-comment-{{ comment.id }}">
     <h3><i>{{ comment.author }}</i></h3><h6><i>{{ comment.date }}</i></h6>
     <h4 style="background-color:Grey;"><i>{{ comment.text }}</i></h4>
-    <a href="{% url 'add-like-comment-location' id=comment.id location=2 %}">
-        <h5>&#128151 {{ comment.likes }}</h5>
-    </a>
+    <h5 class="like-comment" id="comment-{{ comment.id }}">Нравится: {{ comment.likes }}</h5>
     {% if comment.is_liked %}
         <h6><font color="red">Вам понравился этот комментарий</font></h6>
     {% endif %}
     {% if comment.is_owner %}
-        <a href="{% url 'delete-comment' id=comment.id %}">
-            <button type="button" class="btn btn-outline-danger">Удалить комментарий</button>
-        </a>
+        <h4 class="delete-comment" id="delete-comment-{{ comment.id }}">Удалить комментарий</h4>
         <a href="{% url 'update-comment' id=comment.id %}">
-            <button type="button" class="btn btn-outline-danger">Редактировть комментарий</button>
+            <button type="button" class="btn btn-outline-danger">Редактировать комментарий</button>
         </a>
     {% endif %}
     <h6>Комментарий понравился: {{ comment.likes_com.all|join:", " }}</h6>
 
 {% endfor %}
+
+
 
 <br>
 <br>
@@ -58,11 +60,14 @@
 
 
 {% if user.is_authenticated %}
-<form action="{% url 'add-comment' slug=book.slug %}" method="post">
+
+<form action="{% url 'comment-ajax' %}" class="form-comment" method="post" id="{{ book.slug }}">
     {% csrf_token %}
     {{ form }}
-    <input type="submit" value="OK">
+    <input type="submit">
 </form>
-{% endif %}
 
+{% endif %}
+<script src="{% static 'script.js' %}"></script>
+</div>
 {% endblock %}

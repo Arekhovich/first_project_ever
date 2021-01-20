@@ -2,12 +2,22 @@
 
 
 {% block main %}
-<a href="{% url 'login' %}">Login</a>
-<a href="{% url 'logout' %}">Logout</a>
+{% load static %}
+{% if not user.is_authenticated %}
+    <a href="{% url 'login' %}">Login</a>
+{% endif %}
+<br>
+{% if user.is_authenticated %}
+    <a href="{% url 'logout' %}">Logout</a>
+{% endif %}
+<br>
 <a href="{% url 'register' %}">Register</a>
 <br>
+<br>
 <h5>Здравствуйте, {{ user }}</h5>
-<a href="{% url 'account' %}"><h4>Перейти в личный кабинет</h4></a>
+{% if user.is_authenticated %}
+    <a href="{% url 'account' %}"><h4>Перейти в личный кабинет</h4></a>
+{% endif %}
 <br>
 
 <div class="btn-group">
@@ -24,36 +34,36 @@
 
 
     {% for b in books %}
+    <div id="block_book_{{ b.slug }}">
         <a href="{% url 'book-detail' slug=b.slug %}"><h1>{{ b.title }}</h1></a>
         {% if b.is_owner %}
-            <a href="{% url 'delete-book' slug=b.slug %}">
-                <button type="button" class="btn btn-outline-danger">Удалить книгу</button>
-            </a>
+            <h4 class="delete-book" id="delete_book_{{ b.slug }}">Удалить книгу</h4>
             <a href="{% url 'update-book' slug=b.slug %}">
-                <button type="button" class="btn btn-outline-danger">Редактировть книгу</button>
+                <button type="button" class="btn btn-outline-danger">Редактировать книгу</button>
             </a>
         {% endif %}
         <h6><i>{{ b.date }}</i></h6>
         <h4>Жанры: {{ b.genre.all|join:", " }}</h4>
         <h3>{{ b.text }}</h3>
         <h6><i>Авторы: {{ b.authors.all|join:", " }}</i></h6>
-        <span class="badge">{{ b.rate }}</span>
-        {% for i in range %}
-            {% if b.rate >= i %}
-                <a href="{% url 'add-rate' slug=b.slug rate=i %}">
-                    <span class="fa fa-star checked"></span>
-                </a>
-            {% else %}
-                <a href="{% url 'add-rate' slug=b.slug rate=i %}">
-                    <span class="fa fa-star"></span>
-                </a>
-            {% endif %}
 
+
+        <h4 class='add-rate' id="book_rate_{{ b.slug }}">Рейтинг: {{ b.rate }}</h4>
+        {% for i in range %}
+
+            {% if b.rate >= i %}
+                <span class="rate fa fa-star checked" id="book_{{ b.slug }}_{{ i }}"></span>
+            {% else %}
+                <span class="rate fa fa-star" id="book_{{ b.slug }}_{{ i }}"></span>
+            {% endif %}
         {% endfor %}
+
+
         <br>
         <h5><i>Книгу оценили:{{ b.users_like.all|join:", "  }}</i></h5>
 
         <br>
+    </div>
     {% endfor %}
 
 <br>
@@ -63,6 +73,7 @@
 <br>
 <br>
 {% include 'pagination.html' with page=books %}
+
 <h4>Добавьте Вашу книгу</h4>
 {% if user.is_authenticated %}
 <form action="{% url 'add-book' %}" method="post" enctype="multipart/form-data">
@@ -71,5 +82,5 @@
     <input type="submit" value="Сохранить">
 </form>
 {% endif %}
+<script src="{% static 'script.js' %}"></script>
 {% endblock %}
-

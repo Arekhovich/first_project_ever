@@ -1,20 +1,20 @@
 import requests
 from django.contrib.auth import login, logout, get_user_model
-# from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Count, Prefetch, Exists, OuterRef, Q
-from django.http import JsonResponse
+from django.db.models import Prefetch, Exists, OuterRef
 from django.shortcuts import render, redirect
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.http import HttpResponse
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.views.decorators.cache import cache_page
+
 from manager.forms import BookForm, CustomAuthenticationForm, CommentForm, CustomUserCreationForm, UserForm, \
     ProfileForm
-from manager.models import Book, LikeComment, Comment, Genre, Profile, VisitPage, GitToken, GitRepos
+from manager.models import Book, LikeComment, Comment, Genre, Profile, VisitPage, GitAccount
 from manager.models import LikeBookUser as RateBookUser
-from manager.tasks import update_repos
 User = get_user_model()
 
 
@@ -55,10 +55,20 @@ class PageGenre(View):
         if request.user.is_authenticated:
             is_owner = Exists(User.objects.filter(books=OuterRef('pk'), id=request.user.id))
             books = books.annotate(is_owner=is_owner)
-        context['books'] = books.order_by('date')
+        # Добавление постраничного отображения
+        page = request.GET.get('page', 1)
+        books = Paginator(books, 7)
+        try:
+            books = books.get_page(page)
+        except PageNotAnInteger:
+            books = books.page(1)
+        except EmptyPage:
+            books = books.page(books.num_pages)
+        context['books'] = books
         context['range'] = range(1, 6)
         context['form'] = BookForm()
         context['gen'] = gen
+        context['page'] = page
         return render(request, 'page_books_genre.html', context)
 
 
@@ -207,6 +217,7 @@ class UpdateBook(View):
 @login_required
 @transaction.atomic
 def update_profile(request):
+    context = {}
     if request.method == 'POST':
 
         user_form = UserForm(data=request.POST, files=request.FILES, instance=request.user)
@@ -220,12 +231,14 @@ def update_profile(request):
         user_form = UserForm(instance=request.user)
         profile_form = ProfileForm(instance=request.user.profile)
     visit = VisitPage.objects.filter(user=request.user)
-    repos = GitRepos.objects.filter(user=request.user)
-    return render(request, 'account_user.html', {'user_form': user_form,
-                                                 'profile_form': profile_form,
-                                                 'visit': visit,
-                                                 'repos': repos
-                                                 })
+    if GitAccount.objects.filter(user_id=request.user.id):
+        repos = GitAccount.objects.get(user_id=request.user.id)
+        context['repos'] = repos._title_repos
+    context['user_form'] = user_form
+    context['profile_form'] = profile_form
+    context['visit'] = visit
+
+    return render(request, 'account_user.html', context)
 
 
 client_id = '337aad28ea23eaed3ddd'
@@ -239,23 +252,19 @@ class GitReposCallback(View):
         data = {'client_id': client_id, 'client_secret': client_secret, 'code': code}
         token = requests.post(url, data=data, headers={'Accept': 'application/json'})
         token = token.json()['access_token']
-        if GitToken.objects.filter(user=request.user):
-            GitToken.objects.filter(user=request.user).update(user=request.user, git_token=token)
-        else:
-            GitToken.objects.create(user=request.user, git_token=token)
         connections_url = 'https://api.github.com/user'
         response = requests.get(connections_url,
                                 headers={'Authorization': 'token  ' + token})
         login = response.json()['login']
-        repos = requests.get("https://api.github.com/users/" + login + "/repos").json()
-        if GitRepos.objects.filter(user=request.user):
-            GitRepos.objects.filter(user=request.user).delete()
-            for r in repos:
-                GitRepos.objects.create(user=request.user, title_repos=r['name'])
-        else:
-            for r in repos:
-                GitRepos.objects.create(user=request.user, title_repos=r['name'])
-        return HttpResponse("Аутентификация произведена успешно")
+        response_repos = requests.get("https://api.github.com/users/" + login + "/repos").json()
+        repos = [r['name'] for r in response_repos]
+        if request.user.is_authenticated:
+            if GitAccount.objects.filter(user=request.user):
+                GitAccount.objects.filter(user=request.user).delete()
+                GitAccount.objects.create(user=request.user, github_account=login, _title_repos=repos)
+            else:
+                GitAccount.objects.create(user=request.user, github_account=login, _title_repos=repos)
+        return redirect("Аутентификация произведена успешно")
 
 
 def page_not_found(request):
