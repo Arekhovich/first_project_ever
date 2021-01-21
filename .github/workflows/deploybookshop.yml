@@ -9,7 +9,7 @@ on:
 jobs:
   job_one:
     name: Deploy
-    runs-on: debian-latest
+    runs-on: ubuntu-latest
     steps:
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@master
