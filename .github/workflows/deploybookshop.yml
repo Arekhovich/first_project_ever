@@ -1,0 +1,21 @@
+name: deplyment_bookshop
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  job_one:
+    name: Deploy
+    runs-on: debian-latest
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@master
+      with:
+        host: katerina.ololosha.xyz
+        username: lenovo
+        key: ${{ secrets.PRIVATE_KEY }}
+        port: 8000
+        script: 
+          cd the_best_project_ever
+          git pull origin master
+          git status

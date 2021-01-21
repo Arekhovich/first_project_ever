@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
 from django.forms import ModelForm, TextInput, Textarea, CharField, PasswordInput, BaseForm, ModelMultipleChoiceField, \
-    ModelChoiceField, SelectMultiple, CheckboxSelectMultiple, DateField, DateInput
+    ModelChoiceField, SelectMultiple, CheckboxSelectMultiple, DateField, DateInput, forms
 from manager.models import Book, Comment, Profile
 from django.contrib.auth.forms import AuthenticationForm, UsernameField, UserCreationForm
+from captcha.fields import CaptchaField
 
 
 class CustomAuthenticationForm(AuthenticationForm):
@@ -46,6 +47,7 @@ class BookForm(ModelForm):
 
 
 class CommentForm(ModelForm):
+    captcha = CaptchaField()
     class Meta:
         model = Comment
         fields = ["text"]
@@ -75,3 +77,4 @@ class ProfileForm(ModelForm):
             "about_user": Textarea(attrs={"class": "form-control", "rows": 5, "cols": 20}),
             "date_of_birth": DateInput()
         }
+

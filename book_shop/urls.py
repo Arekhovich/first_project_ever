@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('shop/', include('manager.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
+    path('captcha//', include('captcha.urls')),
     path('oauth/', include('oauth.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:

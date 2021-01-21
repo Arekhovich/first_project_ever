@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'oauth',
     'rest_framework',
+    'captcha',
 ]
 
 MIDDLEWARE = [
@@ -147,12 +148,17 @@ CACHES = {
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-    'manager/static/',
-]
+# STATICFILES_DIRS = [
+#     BASE_DIR / "static",
+#     'manager/static/',
+# ]
 
-
+CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.random_char_challenge'
+CAPTCHA_IMAGE_SIZE = (150, 50)
+CAPTCHA_FONT_SIZE = (28)
+CAPTCHA_BACKGROUND_COLOR = '#cccccc'
+CAPTCHA_FOREGROUND_COLOR = '#001100'
+CAPTCHA_LENGTH = 6
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

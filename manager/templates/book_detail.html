@@ -64,7 +64,9 @@
 <form action="{% url 'comment-ajax' %}" class="form-comment" method="post" id="{{ book.slug }}">
     {% csrf_token %}
     {{ form }}
+    {{ captcha }}
     <input type="submit">
+    <button class='js-captcha-refresh'></button>
 </form>
 
 {% endif %}
