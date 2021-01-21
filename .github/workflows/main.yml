@@ -1,0 +1,23 @@
+  
+# This is a basic workflow to help you get started with Actions
+
+name: deplyment_bookshop
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  run_tests:
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@master
+        with:
+          host: katerina.ololosha.xyz
+          username: lenovo
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: 8000
+          script: 
+            cd the_best_project_ever
+            git pull origin master  
+            git status
