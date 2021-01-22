@@ -28,3 +28,6 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test manager.tests
+      env:
+        BOOK_ACCOUNT: ${{ secrets.BOOK_ACCOUNT }}
+        AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
