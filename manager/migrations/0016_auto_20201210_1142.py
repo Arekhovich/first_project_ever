@@ -6,7 +6,7 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-    atomic = False
+
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('manager', '0015_comment_likes'),
