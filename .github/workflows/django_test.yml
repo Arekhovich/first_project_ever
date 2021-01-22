@@ -28,6 +28,8 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test manager.tests
+        coverage run --source="." manage.py test
+        coverage html
       env:
         BOOK_ACCOUNT: ${{ secrets.BOOK_ACCOUNT }}
         AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
