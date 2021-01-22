@@ -40,3 +40,5 @@ jobs:
         REMOTE_USER: ${{ secrets.REMOTE_USER }}
         BOOK_ACCOUNT: ${{ secrets.BOOK_ACCOUNT }}
         AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
+        PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+        script: cd ${{ secrets.PROJECT_PATH }} && git pull
