@@ -28,8 +28,10 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test manager.tests
+    - name: Django Coverage action
+      run: 
+        coverage run --omit=*/tests/* --source=hc manage.py test
       env:
         BOOK_ACCOUNT: ${{ secrets.BOOK_ACCOUNT }}
         AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
-    - name: Django Coverage action
-      uses: actions/python-django-coverage-gitHub-action@0.9
+    
