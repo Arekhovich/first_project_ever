@@ -30,7 +30,7 @@ jobs:
         python manage.py test manager.tests
     - name: Django Coverage action
       run: 
-        coverage run --source=". " manage.py test
+        coverage run --source='.' manage.py test
         coverage html
       env:
         BOOK_ACCOUNT: ${{ secrets.BOOK_ACCOUNT }}
