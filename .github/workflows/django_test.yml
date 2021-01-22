@@ -30,6 +30,7 @@ jobs:
         python manage.py test manager.tests
     - name: Django Coverage action
       run: 
+        python -m pip install coverage
         coverage run --source='.' manage.py test
         coverage html
       env:
