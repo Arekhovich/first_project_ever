@@ -12,9 +12,7 @@ import os
 from django.core.wsgi import get_wsgi_application
 from django.conf import settings
 
-if settings.DEBUG:
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'book_shop.settings')
-else:
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'book_shop.settingsPROD')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'book_shop.settings')
+
 
 application = get_wsgi_application()

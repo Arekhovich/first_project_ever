@@ -2,12 +2,8 @@ import os
 
 from celery import Celery
 
-from django.conf import settings
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'book_shop.settings')
 
-if settings.DEBUG:
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'book_shop.settings')
-else:
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'book_shop.settingsPROD')
 
 app = Celery()
 
