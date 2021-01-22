@@ -32,7 +32,7 @@ jobs:
       run: |
         coverage run --source='.' manage.py test
         coverage html
-    - name: Deploy to google 
+    - name: Deploy to google server
       uses: easingthemes/ssh-deploy@v2.1.5
       env:
         SSH_PRIVATE_KEY: ${{ secrets.BOOKSHOP_KEY }}
