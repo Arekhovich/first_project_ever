@@ -28,6 +28,9 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test manager.tests
+    - name: Coverage tests
+      run:
+        pip install coverage
         coverage run --source="." manage.py test
         coverage html
       env:
