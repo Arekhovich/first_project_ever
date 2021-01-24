@@ -33,12 +33,9 @@ jobs:
         coverage run --source='.' manage.py test
         coverage html
     - name: Deploy to google server
-      uses: easingthemes/ssh-deploy@v2.1.5
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.BOOKSHOP_KEY }}
-        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-        REMOTE_USER: ${{ secrets.REMOTE_USER }}
-        BOOK_ACCOUNT: ${{ secrets.BOOK_ACCOUNT }}
-        AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
-        PASSWORD: ${{ secrets.SERVER_PASSWORD }}
-        script: cd ${{ secrets.PROJECT_PATH }} && git pull
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        script: cd the_best_project_ever && git pull
