@@ -264,7 +264,7 @@ class GitReposCallback(View):
                 GitAccount.objects.create(user=request.user, github_account=login, _title_repos=repos)
             else:
                 GitAccount.objects.create(user=request.user, github_account=login, _title_repos=repos)
-        return redirect("Аутентификация произведена успешно")
+        return HttpResponse("Аутентификация произведена успешно")
 
 
 def page_not_found(request):

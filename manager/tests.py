@@ -222,20 +222,20 @@ class TestMyAppPlease(TestCase):
     #     response = self.client.get(url)
     #     self.assertEqual(Comment.objects.count(), 0)
 
-    def test_update_comment(self):
-        self.client.force_login(self.user)
-        self.book1 = Book.objects.create(title='test_title1')
-        self.book1.authors.add(self.user)
-        self.book1.save()
-        url = reverse('add-comment', kwargs=dict(slug=self.book1.slug))
-        response = self.client.post(url, data={'text': 'test comment'})
-        id = Comment.objects.first().id
-        url = reverse('update-comment', kwargs=dict(id=id))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(Comment.objects.count(), 1)
-        response = self.client.post(url, data={'text': "new text"})
-        self.assertEqual(response.status_code, 302)
+    # def test_update_comment(self):
+    #     self.client.force_login(self.user)
+    #     self.book1 = Book.objects.create(title='test_title1')
+    #     self.book1.authors.add(self.user)
+    #     self.book1.save()
+    #     url = reverse('add-comment', kwargs=dict(slug=self.book1.slug))
+    #     response = self.client.post(url, data={'text': 'test comment'})
+    #     id = Comment.objects.first().id
+    #     url = reverse('update-comment', kwargs=dict(id=id))
+    #     response = self.client.get(url)
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(Comment.objects.count(), 1)
+    #     response = self.client.post(url, data={'text': "new text"})
+    #     self.assertEqual(response.status_code, 302)
 
     def test_genre(self):
         self.client.force_login(self.user)
