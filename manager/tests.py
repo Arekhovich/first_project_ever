@@ -5,7 +5,7 @@ from django.test import TestCase, TransactionTestCase, Client
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from slugify import slugify
-
+from json import dumps
 from manager.forms import CustomAuthenticationForm
 from manager.models import Book, Comment
 from rest_framework.test import APITestCase
@@ -310,16 +310,26 @@ class TestMyAppExcepts(TransactionTestCase):
 
 class RestTest(APITestCase):
     def setUp(self):
-        self.login = 'testname'
-        self.pwd = 'test.pwd'
-        self.user = User.objects.create_user(name=self.login,
-                                             password=self.pwd)
+        self.login = "test_name"
+        self.pwd = "test_pwd"
+        self.user = User.objects.create_user(
+            username=self.login,
+            password=self.pwd
+        )
+
     def test_create_token(self):
-        url = reverse('create-token')
+        url = reverse("create-token")
         data = {
-            'login': self.login,
-            'pwd': self.pwd
+            "login": self.login,
+            "pwd": self.pwd
         }
-        response = self.client.post(path=url, data=data)
-        self.assertEqual(response.status_code, status=status.HTTP_201_CREATED)
-        self.assertEqual(Token.objects.get(user=self.user.__str__{}, response.json['token']))
+        response = self.client.post(
+            path=url,
+            data=dumps(data),
+            content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            Token.objects.get(user=self.user).__str__(),
+            response.json()['token']
+        )
