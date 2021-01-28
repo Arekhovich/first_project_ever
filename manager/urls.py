@@ -5,7 +5,8 @@ from django.views.decorators.cache import cache_page
 from manager.views import MyPage, AddCommentLike, BookDetail, AddRate2Book, AddBook, LoginView, \
     logout_user, AddComment, book_delete, UpdateBook, comment_delete, UpdateComment, RegisterView, \
     PageGenre, update_profile, GitReposCallback
-from manager.views_ajax import add_rate, delete_book, add_comment_ajax, DeleteComment, AddLikeComment, CreateBook
+from manager.views_ajax import add_rate, delete_book, add_comment_ajax, DeleteComment, AddLikeComment, CreateBook, \
+    CreateToken
 
 urlpatterns = [
     path('add_like_comment/<int:id>', AddCommentLike.as_view(), name="add-like-comment"),
@@ -23,13 +24,16 @@ urlpatterns = [
     path('page_genre/<str:genre>/', PageGenre.as_view(), name="page-genre"),
     path("login/", LoginView.as_view(), name="login"),
     path("register/", RegisterView.as_view(), name="register"),
+    path('callback', GitReposCallback.as_view(), name="the-git-repos"),
     path("logout/", logout_user, name="logout"),
+    path('create_token/', CreateToken.as_view(), name='create-token'),
     path("account/", update_profile, name="account"),
     path('add_like2comment_ajax/<int:pk>', AddLikeComment.as_view()),
     path('add_comment_ajax', add_comment_ajax, name='comment-ajax'),
     path('delete_comment_ajax/<int:pk>', DeleteComment.as_view()),
     path('delete_book_ajax', delete_book),
     path('create_book_ajax', CreateBook.as_view()),
-    re_path(r'^[-\w]+/', GitReposCallback.as_view(), name="the-git-repos"),
     path("", MyPage.as_view(), name="the-main-page"),
 ]
+
+#re_path(r'^[-\w]+/', GitReposCallback.as_view(), name="the-git-repos"),

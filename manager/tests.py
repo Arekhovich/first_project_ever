@@ -2,10 +2,14 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.test import TestCase, TransactionTestCase, Client
+from rest_framework import status
+from rest_framework.authtoken.models import Token
 from slugify import slugify
 
 from manager.forms import CustomAuthenticationForm
 from manager.models import Book, Comment
+from rest_framework.test import APITestCase
+from rest_framework import status
 
 
 class TestMyAppPlease(TestCase):
@@ -303,3 +307,19 @@ class TestMyAppExcepts(TransactionTestCase):
         self.assertEqual(self.book1.text, data['text'], msg='book is not refresh')
         self.book2 = Book.objects.create(title='test_title1')
         self.assertNotEqual(self.book2.slug, 'test-title1')
+
+class RestTest(APITestCase):
+    def setUp(self):
+        self.login = 'testname'
+        self.pwd = 'test.pwd'
+        self.user = User.objects.create_user(name=self.login,
+                                             password=self.pwd)
+    def test_create_token(self):
+        url = reverse('create-token')
+        data = {
+            'login': self.login,
+            'pwd': self.pwd
+        }
+        response = self.client.post(path=url, data=data)
+        self.assertEqual(response.status_code, status=status.HTTP_201_CREATED)
+        self.assertEqual(Token.objects.get(user=self.user.__str__{}, response.json['token']))

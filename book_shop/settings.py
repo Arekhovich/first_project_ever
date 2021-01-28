@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'oauth',
     'rest_framework',
+    'rest_framework.authtoken',
     'captcha',
 ]
 

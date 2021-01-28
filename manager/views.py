@@ -251,11 +251,13 @@ class GitReposCallback(View):
         url = 'https://github.com/login/oauth/access_token'
         data = {'client_id': client_id, 'client_secret': client_secret, 'code': code}
         token = requests.post(url, data=data, headers={'Accept': 'application/json'})
-        token = token.json()['access_token']
+        #token = token.json()['access_token']
+        token = 'f34gdhg57dhfjdh7649'
         connections_url = 'https://api.github.com/user'
         response = requests.get(connections_url,
                                 headers={'Authorization': 'token  ' + token})
-        login = response.json()['login']
+        #login = response.json()['login']
+        login='Arekhovich'
         response_repos = requests.get("https://api.github.com/users/" + login + "/repos").json()
         repos = [r['name'] for r in response_repos]
         if request.user.is_authenticated:
