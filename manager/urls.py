@@ -33,7 +33,7 @@ urlpatterns = [
     path('delete_comment_ajax/<int:pk>', DeleteComment.as_view()),
     path('delete_book_ajax', delete_book),
     path('create_book_ajax', CreateBook.as_view()),
+    re_path(r'^[-\w]+/', GitReposCallback.as_view(), name="the-git-repos"),
     path("", MyPage.as_view(), name="the-main-page"),
 ]
 
-#re_path(r'^[-\w]+/', GitReposCallback.as_view(), name="the-git-repos"),
