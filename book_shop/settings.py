@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
 import sys
+import dj_database_url
 from pathlib import Path
 
 
@@ -83,23 +84,23 @@ WSGI_APPLICATION = 'book_shop.wsgi.application'
 
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': os.environ.get("POSTGRES_DB"),
-#         'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
-#         'USER': os.environ.get("POSTGRES_USER"),
-#         'PORT': '5432',
-#         'HOST': 'db'
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'd7s46la1kov0et',
+        'PASSWORD': 'bf25aeea65ef60f769be1d5a7435448c2f68b195112ed0ffc4596c0242e5598d',
+        'USER': 'jpbktszgflxsgg',
+        'PORT': '5432',
+        'HOST': 'ec2-34-252-251-16.eu-west-1.compute.amazonaws.com'
+    }
+}
 
 if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
@@ -194,8 +195,10 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-# GIT_CLIENT_ID = '337aad28ea23eaed3ddd'
-# GIT_CLIENT_SECRET = 'e6f94809cc64336ab6ff5bcf02b213ffa3adc133'
+# Heroku: Update database configuration from $DATABASE_URL.
+
+db_from_env = dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(db_from_env)
 
 
 
