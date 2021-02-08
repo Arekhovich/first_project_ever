@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
+import sys
 from pathlib import Path
 
 
@@ -24,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '^@kgv##*9lo@oeysb+g+*$ob&uxjqd(ay1-3(zx13ysz%n6zrw'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['bookshopdjangopetproject.herokuapp.com', '127.0.0.1']
 
 # DEBUG = False
 # ALLOWED_HOSTS = ['*']
@@ -80,9 +81,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'book_shop.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-#'HOST': os.environ.get('POSTGRES_HOST', default='localhost')
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -90,21 +96,10 @@ WSGI_APPLICATION = 'book_shop.wsgi.application'
 #         'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
 #         'USER': os.environ.get("POSTGRES_USER"),
 #         'PORT': '5432',
-#         'HOST': '127.0.0.1'
+#         'HOST': 'db'
 #     }
 # }
-import os
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get("POSTGRES_DB"),
-        'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
-        'USER': os.environ.get("POSTGRES_USER"),
-        'PORT': '5432',
-        'HOST': 'db'
-    }
-}
-import sys
+
 if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
     DATABASES['default']['NAME'] = ':memory:'
