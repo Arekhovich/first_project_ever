@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '^@kgv##*9lo@oeysb+g+*$ob&uxjqd(ay1-3(zx13ysz%n6zrw'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['bookshopdjangopetproject.herokuapp.com', '127.0.0.1']
 
